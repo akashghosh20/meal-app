@@ -38,6 +38,7 @@ dependencies:
   http: ^1.2.2
   shared_preferences: ^2.2.3
   curved_labeled_navigation_bar: ^2.0.2
+  getwidget: ^4.0.0
 
 dev_dependencies:
   flutter_test:

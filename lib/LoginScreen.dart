@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -107,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 20),
                 if (_isLoading)
-                  CircularProgressIndicator()
+                   GFLoader(type: GFLoaderType.circle,)
                 else
                   ElevatedButton(
                     onPressed: _login,
