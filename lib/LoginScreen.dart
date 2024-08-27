@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/ManagerLogin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'HomeScreen.dart'; // Update this to the correct import path
@@ -47,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final email = responseData['email'];
       final role = responseData['role'];
       final username = responseData['username'];
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('authToken', token);
       await prefs.setString('email', email);
@@ -83,7 +85,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-               
                 SizedBox(height: 40),
                 Text(
                   'Login',
@@ -108,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 20),
                 if (_isLoading)
-                   GFLoader(type: GFLoaderType.circle,)
+                  GFLoader(type: GFLoaderType.circle)
                 else
                   ElevatedButton(
                     onPressed: _login,
@@ -125,6 +126,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ManagerLogin()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white, // Background color
+                    foregroundColor: Colors.blueAccent, // Text color
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: Text(
+                    'Manager Login',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 if (_errorMessage != null) ...[
                   SizedBox(height: 20),
                   Text(
