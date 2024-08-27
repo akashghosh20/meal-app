@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mealapp/PeopleScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';  // Import the PeopleScreen file
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -74,6 +74,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('People List'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PeopleScreen()),
+                );
+              },
+            ),
             // Add more sidebar items here if needed
           ],
         ),
@@ -118,7 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   SizedBox(height: 20),
                   Expanded(
-                    child: _buildMealStatusChart(allMealStatus),
+                    child: _buildMealStatusList(allMealStatus),
                   ),
                 ],
               ),
@@ -152,55 +162,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildMealStatusChart(List<dynamic> allMealStatus) {
-    List<FlSpot> spots = [];
-
-    for (var i = 0; i < allMealStatus.length; i++) {
-      final mealStatus = allMealStatus[i];
-      final date = i.toDouble(); // Using index as X value
-      final totalMeal = double.parse(mealStatus['totalmeal'].toString());
-
-      spots.add(FlSpot(date, totalMeal));
-    }
-
-    return LineChart(
-      LineChartData(
-        gridData: FlGridData(show: false),
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: true),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                return Text(
-                  '${allMealStatus[value.toInt()]['date']}',
-                  style: TextStyle(fontSize: 10),
-                );
-              },
-              reservedSize: 40,
+  Widget _buildMealStatusList(List<dynamic> allMealStatus) {
+    return ListView.builder(
+      itemCount: allMealStatus.length,
+      itemBuilder: (context, index) {
+        final mealStatus = allMealStatus[index];
+        return Card(
+          elevation: 2,
+          margin: EdgeInsets.symmetric(vertical: 4),
+          child: ListTile(
+            title: Text(
+              'Date: ${mealStatus['date']}',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-          ),
-        ),
-        borderData: FlBorderData(show: true, border: Border.all(color: Colors.grey)),
-        minX: 0,
-        maxX: (allMealStatus.length - 1).toDouble(),
-        minY: 0,
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            color: Colors.blue,
-            barWidth: 2,
-            belowBarData: BarAreaData(
-              show: true,
-              color: Colors.blue.withOpacity(0.3),
+            subtitle: Text(
+              'Total Meals: ${mealStatus['totalmeal']}',
+              style: TextStyle(fontSize: 14),
             ),
-            dotData: FlDotData(show: false),
+            contentPadding: EdgeInsets.all(16),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -210,6 +192,7 @@ void main() {
     home: DashboardScreen(),
     routes: {
       '/dashboard': (context) => DashboardScreen(),
+      '/people': (context) => PeopleScreen(), // Register the new route
     },
   ));
 }
