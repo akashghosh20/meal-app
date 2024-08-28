@@ -1,14 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:mealapp/EdituserProfile.dart';
+import 'package:mealapp/ManagerDetailScreen.dart';
 import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'ManagerDetailScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,6 +26,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String? username;
   String? email;
   String? role;
+  File? _image;
+  String _message = ''; // Declare _message here
+
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -54,13 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?managers'),
       headers: {
-        'Authorization': '$token',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-
-    print('Manager Lists Response status: ${response.statusCode}');
-    print('Manager Lists Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -81,19 +84,68 @@ class _HomeScreenState extends State<HomeScreen> {
     final response = await http.get(
       Uri.parse('https://raihanmiraj.com/api/?getmeal'),
       headers: {
-        'Authorization': '$token',
+        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-
-    print('Meal Data Response status: ${response.statusCode}');
-    print('Meal Data Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       return data;
     } else {
       throw Exception('Failed to load meal data');
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+
+      await _uploadImage();
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_image == null) return;
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    if (token == null) {
+      setState(() {
+        _message = 'Auth token not found';
+      });
+      return;
+    }
+
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('https://mealstatus.raihanmiraj.com/backend/api/?imageupload'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      final responseData = json.decode(responseBody);
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        setState(() {
+          _message = 'Image uploaded successfully';
+        });
+      } else {
+        setState(() {
+          _message = 'Failed to upload image: ${responseData['message'] ?? 'Unknown error'}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _message = 'Error: $e';
+      });
     }
   }
 
@@ -150,6 +202,31 @@ class _HomeScreenState extends State<HomeScreen> {
           if (username != null) Text('Username: $username', style: TextStyle(fontSize: 18)),
           if (email != null) Text('Email: $email', style: TextStyle(fontSize: 18)),
           if (role != null) Text('Role: $role', style: TextStyle(fontSize: 18)),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EditProfileScreen()),
+              );
+            },
+            child: Text('Edit Profile'),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _pickImage,
+            child: Text('Pick and Upload Image'),
+          ),
+          SizedBox(height: 20),
+          if (_message.isNotEmpty)
+            Center(
+              child: Text(
+                _message,
+                style: TextStyle(
+                  color: _message.contains('successfully') ? Colors.green : Colors.red,
+                ),
+              ),
+            ),
         ],
       ),
     );

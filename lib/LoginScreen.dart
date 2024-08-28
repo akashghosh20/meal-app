@@ -1,13 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealapp/ManagerLogin.dart';
 import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'HomeScreen.dart'; // Update this to the correct import path
+import 'HomeScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -43,12 +41,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
-      final token = responseData['token']; // Adjust this if the token is under a different key
+      final token = responseData['token'];
       final hallid = responseData['hallid'];
       final name = responseData['name'];
       final email = responseData['email'];
       final role = responseData['role'];
       final username = responseData['username'];
+      final phone = responseData['phone'];
+      final bloodgroup = responseData['bloodgroup'];
+      final password = _passwordController.text;
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('authToken', token);
@@ -57,6 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('username', username);
       await prefs.setString('role', role);
       await prefs.setString('name', name);
+      await prefs.setString('phone', phone);
+      await prefs.setString('bloodgroup', bloodgroup);
+      await prefs.setString('password', password);
 
       Navigator.pushReplacement(
         context,

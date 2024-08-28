@@ -82,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.people),
+              leading: Icon(Icons.food_bank_rounded),
               title: Text('Meal List'),
               onTap: () {
                 Navigator.push(
@@ -92,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.people),
+              leading: Icon(Icons.insert_comment),
               title: Text('Insert Spents'),
               onTap: () {
                 Navigator.push(
@@ -102,7 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.people),
+              leading: Icon(Icons.get_app),
               title: Text('Get Spents'),
               onTap: () {
                 Navigator.push(
@@ -112,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.people),
+              leading: Icon(Icons.print_sharp),
               title: Text('Print Sheets'),
               onTap: () {
                 Navigator.push(
@@ -122,7 +122,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.people),
+              leading: Icon(Icons.people_alt_rounded),
               title: Text('Students'),
               onTap: () {
                 Navigator.push(

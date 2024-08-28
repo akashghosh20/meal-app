@@ -64,7 +64,7 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://raihanmiraj.com/api/?insertmealfromuser'),
+        Uri.parse('${Config.baseUrl}?insertmealfromuser'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json; charset=UTF-8',
