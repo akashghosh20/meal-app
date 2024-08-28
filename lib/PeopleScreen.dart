@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +12,8 @@ class PeopleScreen extends StatefulWidget {
 
 class _PeopleScreenState extends State<PeopleScreen> {
   late Future<List<dynamic>> _peopleData;
+  List<dynamic> _filteredPeople = [];
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -41,6 +44,21 @@ class _PeopleScreenState extends State<PeopleScreen> {
     }
   }
 
+  void _filterPeople(List<dynamic> people) {
+    setState(() {
+      _filteredPeople = people.where((person) {
+        final nameLower = person['name'].toLowerCase();
+        final hallLower = person['hallid'].toString().toLowerCase();
+        final roomLower = person['roomno'].toString().toLowerCase();
+        final searchLower = _searchQuery.toLowerCase();
+
+        return nameLower.contains(searchLower) ||
+            hallLower.contains(searchLower) ||
+            roomLower.contains(searchLower);
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,35 +76,73 @@ class _PeopleScreenState extends State<PeopleScreen> {
             return Center(child: Text('No data available'));
           } else {
             final people = snapshot.data!;
+            if (_filteredPeople.isEmpty && _searchQuery.isEmpty) {
+              _filteredPeople = people;
+            }
 
-            return ListView.builder(
-              itemCount: people.length,
-              itemBuilder: (context, index) {
-                final person = people[index];
-                return Card(
-                  elevation: 4,
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: ListTile(
-                    title: Text(
-                      person['name'],
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GFSearchBar(
+                    searchList: people,
+                    searchQueryBuilder: (query, list) {
+                      setState(() {
+                        _searchQuery = query;
+                      });
+                      _filterPeople(people);
+                      return _filteredPeople.map((item) => item['name']).toList();
+                    },
+                    overlaySearchListItemBuilder: (dynamic item) => Container(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        item,
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ),
-                    subtitle: Text(
-                      'Room: ${person['roomno']}\nPayment: ${person['payment']}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    isThreeLine: true,
-                    onTap: () {
+                    onItemSelected: (dynamic item) {
+                      final selectedPerson = people.firstWhere((person) => person['name'] == item);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PersonDetailsScreen(person: person),
+                          builder: (context) => PersonDetailsScreen(person: selectedPerson),
                         ),
                       );
                     },
                   ),
-                );
-              },
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _filteredPeople.length,
+                    itemBuilder: (context, index) {
+                      final person = _filteredPeople[index];
+                      return Card(
+                        elevation: 4,
+                        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        child: ListTile(
+                          title: Text(
+                            person['name'],
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            'Room: ${person['roomno']}\nPayment: ${person['payment']}',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          isThreeLine: true,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PersonDetailsScreen(person: person),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           }
         },

@@ -2,7 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/GetAllPayments.dart';
+import 'package:mealapp/GetSpents.dart';
+import 'package:mealapp/GetStudents.dart';
+import 'package:mealapp/InsertMeal.dart';
 import 'package:mealapp/PeopleScreen.dart';
+import 'package:mealapp/PrintSheetScreen.dart';
+import 'package:mealapp/SpentsEntry.dart';
 import 'package:shared_preferences/shared_preferences.dart';  // Import the PeopleScreen file
 
 class DashboardScreen extends StatefulWidget {
@@ -76,11 +82,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             ListTile(
               leading: Icon(Icons.people),
-              title: Text('People List'),
+              title: Text('Meal List'),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => PeopleScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('Insert Spents'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => InsertSpentsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('Get Spents'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GetSpentsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('Print Sheets'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SelectDateScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('Students'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => StudentsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.payment),
+              title: Text('Payments'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PaymentScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.insert_chart),
+              title: Text('Insert Meals'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => InsertMealScreen()),
                 );
               },
             ),
@@ -192,7 +258,15 @@ void main() {
     home: DashboardScreen(),
     routes: {
       '/dashboard': (context) => DashboardScreen(),
-      '/people': (context) => PeopleScreen(), // Register the new route
+      '/people': (context) => PeopleScreen(), 
+      '/insertspents':(context) => InsertSpentsScreen(),
+      '/get-spents':(context) => GetSpentsScreen(),
+      '/print-sheets':(context) => SelectDateScreen(),
+      '/get-students':(context) => StudentsScreen(),
+      '/get-allpayments':(context) => PaymentScreen(),
+      '/insert-meals':(context) => InsertMealScreen(),
+      
+      // Register the new route
     },
   ));
 }
