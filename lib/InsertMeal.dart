@@ -16,7 +16,7 @@ class _InsertMealScreenState extends State<InsertMealScreen> {
   String? _selectedStudent;
   DateTime _selectedDate = DateTime.now();
   int _status = 0;
-  String _mealType = 'Lunch';
+  String _mealType = 'Full Meal'; // Default to Full Meal
   bool _isLoading = false;
   String _message = '';
   List<dynamic> _students = [];
@@ -95,7 +95,7 @@ class _InsertMealScreenState extends State<InsertMealScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://raihanmiraj.com/api/?insertnewmeal'),
+        Uri.parse('${Config.baseUrl}?insertnewmeal'),
         headers: {
           'Authorization': '$token',
           'Content-Type': 'application/json',
