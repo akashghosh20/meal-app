@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:mealapp/config.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
@@ -58,7 +59,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('https://raihanmiraj.com/api/?printmealstatustoday=$date'),
+        Uri.parse('${Config.baseUrl}?printmealstatustoday=$date'),
         headers: {
           'Authorization': '$token',
         },

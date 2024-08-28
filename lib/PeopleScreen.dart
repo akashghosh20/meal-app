@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PeopleScreen extends StatefulWidget {
@@ -30,7 +31,7 @@ class _PeopleScreenState extends State<PeopleScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('https://raihanmiraj.com/api/?all'),
+      Uri.parse('${Config.baseUrl}?all'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': '$token',

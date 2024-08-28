@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StudentsScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('https://raihanmiraj.com/api/?students'),
+        Uri.parse('${Config.baseUrl}/?students'),
         headers: {
           'Authorization': '$token',
         },

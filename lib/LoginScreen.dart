@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealapp/ManagerLogin.dart';
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'HomeScreen.dart'; // Update this to the correct import path
@@ -26,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final response = await http.post(
-      Uri.parse('https://raihanmiraj.com/api/?login'),
+      Uri.parse('${Config.baseUrl}/?login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

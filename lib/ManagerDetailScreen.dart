@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ManagerDetailScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('https://raihanmiraj.com/api/?getmealofmanager=${widget.managerId}'),
+      Uri.parse('${Config.baseUrl}?getmealofmanager=${widget.managerId}'),
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json; charset=UTF-8',

@@ -5,6 +5,7 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'ManagerDetailScreen.dart';
@@ -51,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('https://raihanmiraj.com/api/?managers'),
+      Uri.parse('${Config.baseUrl}?managers'),
       headers: {
         'Authorization': '$token',
         'Content-Type': 'application/json; charset=UTF-8',

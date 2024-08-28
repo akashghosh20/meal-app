@@ -4,6 +4,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InsertMealScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _InsertMealScreenState extends State<InsertMealScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('https://raihanmiraj.com/api/?students'),
+        Uri.parse('${Config.baseUrl}?students'),
         headers: {
           'Authorization': '$token',
         },

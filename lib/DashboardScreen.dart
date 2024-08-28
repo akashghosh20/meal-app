@@ -9,6 +9,7 @@ import 'package:mealapp/InsertMeal.dart';
 import 'package:mealapp/PeopleScreen.dart';
 import 'package:mealapp/PrintSheetScreen.dart';
 import 'package:mealapp/SpentsEntry.dart';
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';  // Import the PeopleScreen file
 
 class DashboardScreen extends StatefulWidget {
@@ -34,7 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('https://raihanmiraj.com/api/?getstatus'),
+      Uri.parse('${Config.baseUrl}?getstatus'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': '$token',

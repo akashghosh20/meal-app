@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GetSpentsScreen extends StatefulWidget {
@@ -27,7 +28,7 @@ class _GetSpentsScreenState extends State<GetSpentsScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('https://raihanmiraj.com/api/?getspents'),
+      Uri.parse('${Config.baseUrl}?getspents'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': '$token',

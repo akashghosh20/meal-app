@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealapp/DashboardScreen.dart';
+import 'package:mealapp/config.dart'; // Import the config file
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ManagerLogin extends StatefulWidget {
@@ -26,7 +27,7 @@ class _ManagerLoginState extends State<ManagerLogin> {
 
       try {
         final response = await http.post(
-          Uri.parse('https://raihanmiraj.com/api/?managerlogin'),
+          Uri.parse('${Config.baseUrl}?managerlogin'), // Use base URL
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: json.encode({
             'username': _username,
@@ -44,7 +45,7 @@ class _ManagerLoginState extends State<ManagerLogin> {
             await prefs.setString('managerName', responseData['managersname']);
             await prefs.setString('managerEmail', responseData['email']);
 
-            // Navigate to the WelcomeScreen with the username
+            // Navigate to the DashboardScreen
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
