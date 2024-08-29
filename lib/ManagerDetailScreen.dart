@@ -27,7 +27,7 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
 
   Future<Map<String, dynamic>> fetchMealData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
+    String? token = prefs.getString('AuthToken');
 
     if (token == null) {
       throw Exception('Authentication token is missing');
@@ -56,7 +56,7 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
 
   Future<void> updateMealCount(String date, int newMealCount) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
+    String? token = prefs.getString('AuthToken');
 
     if (token == null) {
       throw Exception('Authentication token is missing');

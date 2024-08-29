@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Map<String, dynamic>>> fetchManagerLists() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
+    String? token = prefs.getString('AuthToken');
 
     if (token == null) {
       throw Exception('Authentication token is missing');
@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?managers'),
       headers: {
-        'Authorization': 'Bearer $token',
+        'Authorization': '$token',
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
@@ -75,16 +75,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<Map<String, dynamic>> fetchMealData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
+    String? token = prefs.getString('AuthToken');
 
     if (token == null) {
       throw Exception('Authentication token is missing');
     }
 
     final response = await http.get(
-      Uri.parse('https://raihanmiraj.com/api/?getmeal'),
+      Uri.parse('${Config.baseUrl}?getmeal'),
       headers: {
-        'Authorization': 'Bearer $token',
+        'Authorization': '$token',
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_image == null) return;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
+    String? token = prefs.getString('AuthToken');
 
     if (token == null) {
       setState(() {
@@ -124,9 +124,9 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('https://mealstatus.raihanmiraj.com/backend/api/?imageupload'),
+        Uri.parse('${Config.baseUrl}?imageupload'),
       );
-      request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Authorization'] = '$token';
       request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
 
       final response = await request.send();

@@ -52,7 +52,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
+    String? token = prefs.getString('AuthToken');
 
     if (token == null) {
       setState(() {

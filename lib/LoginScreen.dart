@@ -1,10 +1,12 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealapp/ManagerLogin.dart';
 import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'HomeScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,60 +20,62 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  Future<void> _login() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+ Future<void> _login() async {
+  setState(() {
+    _isLoading = true;
+    _errorMessage = null;
+  });
 
-    final response = await http.post(
-      Uri.parse('${Config.baseUrl}/?login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'username': _usernameController.text,
-        'password': _passwordController.text,
-      }),
+  final response = await http.post(
+    Uri.parse('${Config.baseUrl}?login'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{
+      'username': _usernameController.text,
+      'password': _passwordController.text,
+    }),
+  );
+
+  setState(() {
+    _isLoading = false;
+  });
+
+  if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+    final token = responseData['token']; // Updated key
+    print("Auth Token is ${token}");
+    final hallid = responseData['hallid'];
+    final name = responseData['name'];
+    final email = responseData['email'];
+    final role = responseData['role'];
+    final username = responseData['username'];
+    final phone = responseData['phone'];
+    final bloodgroup = responseData['bloodgroup'];
+    final password = _passwordController.text;
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('AuthToken', token); // Storing the correct token
+    await prefs.setString('email', email);
+    await prefs.setString('hallid', hallid);
+    await prefs.setString('username', username);
+    await prefs.setString('role', role);
+    await prefs.setString('name', name);
+    await prefs.setString('phone', phone);
+    await prefs.setString('bloodgroup', bloodgroup);
+    await prefs.setString('password', password);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomeScreen()),
     );
-
+  } else {
     setState(() {
-      _isLoading = false;
+      _errorMessage = 'Login failed. Please check your credentials.';
     });
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      final token = responseData['token'];
-      final hallid = responseData['hallid'];
-      final name = responseData['name'];
-      final email = responseData['email'];
-      final role = responseData['role'];
-      final username = responseData['username'];
-      final phone = responseData['phone'];
-      final bloodgroup = responseData['bloodgroup'];
-      final password = _passwordController.text;
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('authToken', token);
-      await prefs.setString('email', email);
-      await prefs.setString('hallid', hallid);
-      await prefs.setString('username', username);
-      await prefs.setString('role', role);
-      await prefs.setString('name', name);
-      await prefs.setString('phone', phone);
-      await prefs.setString('bloodgroup', bloodgroup);
-      await prefs.setString('password', password);
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } else {
-      setState(() {
-        _errorMessage = 'Login failed. Please check your credentials.';
-      });
-    }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
