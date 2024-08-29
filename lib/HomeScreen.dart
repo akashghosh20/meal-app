@@ -110,52 +110,58 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _uploadImage() async {
-    if (_image == null) return;
+  if (_image == null) return;
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('AuthToken');
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('AuthToken');
 
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-      });
-      return;
-    }
+  if (token == null) {
+    setState(() {
+      _message = 'Auth token not found';
+    });
+    return;
+  }
 
-    try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('${Config.baseUrl}?imageupload'),
-      );
-      request.headers['Authorization'] = '$token';
+  try {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('${Config.baseUrl}?imageupload'),
+    );
+    request.headers['Authorization'] = '$token';
 
-      // Add the image file with the key 'image'
-      request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
+    // Add the image file with the key 'image'
+    request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
 
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-      print(responseBody);
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: $responseBody');
+    print('Response status: ${response.statusCode}');
+    print('Response body: $responseBody');
 
+    if (response.statusCode == 200) {
       final responseData = json.decode(responseBody);
-      if (response.statusCode == 200 && responseData['success'] == true) {
+      if (responseData['success'] == true) {
         setState(() {
           _message = 'Image uploaded successfully';
-          _uploadedImageUrl = responseData['image']; // Assuming API returns the URL of the uploaded image
+          _uploadedImageUrl = null; // Clear the image URL
         });
       } else {
         setState(() {
           _message = 'Failed to upload image: ${responseData['message'] ?? 'Unknown error'}';
         });
       }
-    } catch (e) {
+    } else {
       setState(() {
-        _message = 'Error: $e';
+        _message = 'Failed to upload image. Status code: ${response.statusCode}';
       });
     }
+  } catch (e) {
+    setState(() {
+      _message = 'Error: $e';
+    });
   }
+}
+
 
   void _onTabTapped(int index) {
     setState(() {
@@ -212,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: double.infinity,
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/cover_photo.jpg'), // Placeholder cover photo
+              image: AssetImage('Assets/avatar.png'), // Placeholder cover photo
               fit: BoxFit.cover,
             ),
             borderRadius: BorderRadius.circular(8),
