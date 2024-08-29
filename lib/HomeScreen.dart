@@ -219,14 +219,36 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SizedBox(height: 16),
-        // Profile Picture
+        // Profile Picture with Edit Icon
         Row(
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: _image != null
-                  ? FileImage(_image!)
-                  : AssetImage('assets/profile_placeholder.jpg') as ImageProvider, // Placeholder profile image
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _image != null
+                      ? FileImage(_image!)
+                      : AssetImage('assets/profile_placeholder.jpg') as ImageProvider, // Placeholder profile image
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.camera_alt,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    onPressed: _pickImage,
+                    color: Colors.blue,
+                    padding: EdgeInsets.all(0),
+                    constraints: BoxConstraints(),
+                    iconSize: 20,
+                    tooltip: 'Pick Image',
+                    splashRadius: 20,
+                  ),
+                ),
+              ],
             ),
             SizedBox(width: 16),
             Expanded(
@@ -268,11 +290,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Text('Edit Profile'),
         ),
         SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _pickImage,
-          child: Text('Pick and Upload Image'),
-        ),
-        SizedBox(height: 20),
         if (_message.isNotEmpty)
           Center(
             child: Text(
@@ -290,6 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
 }
+
 
 
   Widget _buildMealData() {
