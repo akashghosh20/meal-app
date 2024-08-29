@@ -201,48 +201,96 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProfile() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (name != null) Text('Name: $name', style: TextStyle(fontSize: 18)),
-          if (username != null) Text('Username: $username', style: TextStyle(fontSize: 18)),
-          if (email != null) Text('Email: $email', style: TextStyle(fontSize: 18)),
-          if (role != null) Text('Role: $role', style: TextStyle(fontSize: 18)),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => EditProfileScreen()),
-              );
-            },
-            child: Text('Edit Profile'),
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Cover Photo
+        Container(
+          height: 200,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/cover_photo.jpg'), // Placeholder cover photo
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.circular(8),
           ),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _pickImage,
-            child: Text('Pick and Upload Image'),
-          ),
-          SizedBox(height: 20),
-          if (_message.isNotEmpty)
-            Center(
-              child: Text(
-                _message,
-                style: TextStyle(
-                  color: _message.contains('successfully') ? Colors.green : Colors.red,
-                ),
+        ),
+        SizedBox(height: 16),
+        // Profile Picture
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundImage: _image != null
+                  ? FileImage(_image!)
+                  : AssetImage('assets/profile_placeholder.jpg') as ImageProvider, // Placeholder profile image
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name ?? 'No Name',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '@$username',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    email ?? 'No Email',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    role ?? 'No Role',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                ],
               ),
             ),
-          if (_uploadedImageUrl != null)  // Display the uploaded image if available
-            Center(
-              child: Image.network(_uploadedImageUrl!),
+          ],
+        ),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => EditProfileScreen()),
+            );
+          },
+          child: Text('Edit Profile'),
+        ),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: _pickImage,
+          child: Text('Pick and Upload Image'),
+        ),
+        SizedBox(height: 20),
+        if (_message.isNotEmpty)
+          Center(
+            child: Text(
+              _message,
+              style: TextStyle(
+                color: _message.contains('successfully') ? Colors.green : Colors.red,
+              ),
             ),
-        ],
-      ),
-    );
-  }
+          ),
+        if (_uploadedImageUrl != null) // Display the uploaded image if available
+          Center(
+            child: Image.network(_uploadedImageUrl!),
+          ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildMealData() {
     return FutureBuilder<Map<String, dynamic>>(
