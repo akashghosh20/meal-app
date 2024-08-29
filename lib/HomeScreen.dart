@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? role;
   File? _image;
   String _message = ''; // Declare _message here
+  String? _uploadedImageUrl; // Added this line
 
   final ImagePicker _picker = ImagePicker();
 
@@ -127,15 +128,22 @@ class _HomeScreenState extends State<HomeScreen> {
         Uri.parse('${Config.baseUrl}?imageupload'),
       );
       request.headers['Authorization'] = '$token';
+
+      // Add the image file with the key 'image'
       request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
+      print(responseBody);
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: $responseBody');
 
       final responseData = json.decode(responseBody);
       if (response.statusCode == 200 && responseData['success'] == true) {
         setState(() {
           _message = 'Image uploaded successfully';
+          _uploadedImageUrl = responseData['image']; // Assuming API returns the URL of the uploaded image
         });
       } else {
         setState(() {
@@ -226,6 +234,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: _message.contains('successfully') ? Colors.green : Colors.red,
                 ),
               ),
+            ),
+          if (_uploadedImageUrl != null)  // Display the uploaded image if available
+            Center(
+              child: Image.network(_uploadedImageUrl!),
             ),
         ],
       ),
