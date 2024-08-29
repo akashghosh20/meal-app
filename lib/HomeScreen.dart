@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   File? _image;
   String _message = ''; // Declare _message here
   String? _uploadedImageUrl; // Added this line
+  bool is_uploading = false;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -109,8 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  
+
   Future<void> _uploadImage() async {
   if (_image == null) return;
+
+  setState((){
+    is_uploading = true;
+    GFLoader(type: GFLoaderType.circle,);
+    
+  });
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('AuthToken');
@@ -118,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
   if (token == null) {
     setState(() {
       _message = 'Auth token not found';
+      is_uploading = false;
     });
     return;
   }
@@ -142,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final responseData = json.decode(responseBody);
       if (responseData['success'] == true) {
         setState(() {
-          _message = 'Image uploaded successfully';
+          _message = "Image Uploaded Successfully.";
           _uploadedImageUrl = null; // Clear the image URL
         });
       } else {
@@ -159,6 +169,8 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _message = 'Error: $e';
     });
+
+   
   }
 }
 
@@ -234,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 50,
                   backgroundImage: _image != null
                       ? FileImage(_image!)
-                      : AssetImage('assets/profile_placeholder.jpg') as ImageProvider, // Placeholder profile image
+                      : AssetImage('Assets/avatar.png') as ImageProvider, // Placeholder profile image
                 ),
                 Positioned(
                   right: 0,
