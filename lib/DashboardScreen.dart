@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/CreateMealDay.dart';
 import 'package:mealapp/GetAllPayments.dart';
 import 'package:mealapp/GetSpents.dart';
 import 'package:mealapp/GetStudents.dart';
@@ -151,6 +152,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
+            ListTile(
+              leading: Icon(Icons.add_box),
+              title: Text('Meal Day'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CreateMealDayScreen()),
+                );
+              },
+            ),
             // Add more sidebar items here if needed
           ],
         ),
@@ -266,6 +277,7 @@ void main() {
       '/get-students':(context) => StudentsScreen(),
       '/get-allpayments':(context) => PaymentScreen(),
       '/insert-meals':(context) => InsertMealScreen(),
+      '/add_mealday':(context) => CreateMealDayScreen()
       
       // Register the new route
     },
