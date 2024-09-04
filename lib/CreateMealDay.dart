@@ -14,13 +14,17 @@ class CreateMealDayScreen extends StatefulWidget {
 class _CreateMealDayScreenState extends State<CreateMealDayScreen> {
   final _formKey = GlobalKey<FormState>();
   DateTime _selectedDate = DateTime.now();
-  DateTime _selectedCopyDate = DateTime.now();
+  String? _selectedCopyDateId;
   String? _authToken;
+  List<Map<String, dynamic>> _mealDays = []; // Store meal days from the API
 
   @override
   void initState() {
     super.initState();
-    _loadToken();
+    print('initState called');
+    _loadToken().then((_) {
+      _fetchMealDays(); // Ensure this is called after the token is loaded
+    });
   }
 
   // Function to load the token from SharedPreferences
@@ -29,7 +33,49 @@ class _CreateMealDayScreenState extends State<CreateMealDayScreen> {
     setState(() {
       _authToken = prefs.getString('authToken');
     });
+    print('Token loaded: $_authToken');
   }
+
+  // Function to fetch meal days from the API
+Future<void> _fetchMealDays() async {
+  print('fetchMealDays called');
+  if (_authToken != null) {
+    print('Token is not null, proceeding with API call');
+    final response = await http.get(
+      Uri.parse('${Config.baseUrl}?getmealday'),
+      headers: {
+        'Authorization': '$_authToken',
+      },
+    );
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('Response data: $responseData');
+
+      if (responseData is List) {
+        setState(() {
+          _mealDays = List<Map<String, dynamic>>.from(responseData);
+          print('Meal days updated: $_mealDays');
+        });
+      } else {
+        print('Unexpected response format: $responseData');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unexpected response format')),
+        );
+      }
+    } else {
+      print('Error: ${response.statusCode}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${response.statusCode}')),
+      );
+    }
+  } else {
+    print('Auth token is null, skipping API call');
+  }
+}
+
 
   // Function to handle date selection
   Future<void> _selectDate(BuildContext context) async {
@@ -46,61 +92,57 @@ class _CreateMealDayScreenState extends State<CreateMealDayScreen> {
     }
   }
 
-  // Function to handle copy date selection
-  Future<void> _selectCopyDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedCopyDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null && picked != _selectedCopyDate) {
-      setState(() {
-        _selectedCopyDate = picked;
-      });
-    }
-  }
-
   // Function to submit the form data
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate() && _authToken != null) {
-      final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-      final formattedCopyDate = DateFormat('yyyy-MM-dd').format(_selectedCopyDate);
+  if (_formKey.currentState!.validate() && _authToken != null && _selectedCopyDateId != null) {
+    final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
 
-      // API request with the token
-      final response = await http.post(
-        Uri.parse('${Config.baseUrl}?createmealday'),
-        headers: {
-          'Authorization': '$_authToken', // Include the token in the header
-        },
-        body: {
-          'date': formattedDate,
-          'copydate': formattedCopyDate,
-        },
-      );
+    // Prepare the request body in JSON format
+    final requestBody = jsonEncode({
+      'date': formattedDate,
+      'copydate': _selectedCopyDateId, // Send the selected copy date ID
+    });
 
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        if (responseData['success'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Meal day created successfully!')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to create meal day!')),
-          );
-        }
-      } else {
+    // API request with the token
+    final response = await http.post(
+      Uri.parse('https://raihanmiraj.com/api/?createmealday'),
+      headers: {
+        'Authorization': '$_authToken', // Include the token in the header
+        'Content-Type': 'application/json', // Specify that the request body is JSON
+      },
+      body: requestBody, // Pass the JSON-encoded body
+    );
+
+    print('Request body: $requestBody');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('Response data: $responseData');
+
+      if (responseData['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.statusCode}')),
+          SnackBar(content: Text('Meal day created successfully!')),
+        );
+      } else {
+        print('Meal day creation failed: ${responseData['message']}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create meal day: ${responseData['message']}')),
         );
       }
     } else {
+      print('Error: ${response.statusCode} - ${response.reasonPhrase}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Token not found or form validation failed!')),
+        SnackBar(content: Text('Error: ${response.statusCode} - ${response.reasonPhrase}')),
       );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Token not found, form validation failed, or copy date not selected!')),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -123,11 +165,25 @@ class _CreateMealDayScreenState extends State<CreateMealDayScreen> {
               ),
               SizedBox(height: 20),
 
-              // Date Picker for the copy date
-              ListTile(
-                title: Text('Select Copy Date: ${DateFormat('yyyy-MM-dd').format(_selectedCopyDate)}'),
-                trailing: Icon(Icons.calendar_today),
-                onTap: () => _selectCopyDate(context),
+              // Dropdown for the copy date
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  labelText: 'Select Copy Date',
+                  border: OutlineInputBorder(),
+                ),
+                value: _selectedCopyDateId,
+                items: _mealDays.map((mealDay) {
+                  return DropdownMenuItem<String>(
+                    value: mealDay['id'].toString(), // Use the id as the value
+                    child: Text(mealDay['date']), // Display the date in the dropdown
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCopyDateId = value;
+                  });
+                },
+                validator: (value) => value == null ? 'Please select a copy date' : null,
               ),
               SizedBox(height: 40),
 

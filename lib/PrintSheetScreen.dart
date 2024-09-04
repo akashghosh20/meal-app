@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart'; // Import the PDF viewer package
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mealapp/config.dart';
@@ -21,7 +23,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
   String _message = '';
-  String? _pdfPath;
+  Uint8List? _pdfBytes; // Store the PDF bytes for displaying
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime initialDate = _selectedDate;
@@ -40,7 +42,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
     }
   }
 
-  Future<void> _generateAndDownloadPdf(String date) async {
+  Future<void> _generateAndDisplayPdf(String date) async {
     setState(() {
       _isLoading = true;
       _message = '';
@@ -66,23 +68,19 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print(data);
-
-        final List<dynamic> listData = data; // Use the data directly as a list
-        print(listData);
-
+        final List<dynamic> listData = json.decode(response.body);
+        
         final Map<String, List<Map<String, String>>> groupedData = {};
         for (var item in listData) {
           if (item is Map<String, dynamic>) {
-            String roomNo = item['roomno'].toString(); // Ensure roomNo is treated as String
+            String roomNo = item['roomno'].toString();
             if (!groupedData.containsKey(roomNo)) {
               groupedData[roomNo] = [];
             }
             groupedData[roomNo]!.add({
               'name': item['name'].toString(),
-              'lunch': '', // Keep lunch column empty
-              'dinner': '', // Keep dinner column empty
+              'lunch': '',
+              'dinner': '',
             });
           }
         }
@@ -117,7 +115,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                           ];
                         }).toList(),
                       ),
-                      pw.SizedBox(height: 20), // Space between tables
+                      pw.SizedBox(height: 20),
                     ],
                   );
                 }).toList(),
@@ -126,12 +124,9 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
           ),
         );
 
-        final outputFile = await _getOutputFile();
-        final file = File(outputFile.path);
-        await file.writeAsBytes(await pdf.save());
-
+        _pdfBytes = await pdf.save();
         setState(() {
-          _pdfPath = outputFile.path;
+          // Clear the path if using bytes
         });
 
         // Request storage permission
@@ -145,9 +140,9 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
             // Path to save the PDF
             final newFilePath = '${result}/meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
             
-            // Check if the directory is writable
-            final fileToCopy = File(_pdfPath!);
-            await fileToCopy.copy(newFilePath);
+            // Save the PDF to the selected directory
+            final file = File(newFilePath);
+            await file.writeAsBytes(_pdfBytes!);
             
             setState(() {
               _message = 'PDF downloaded successfully to: $newFilePath';
@@ -183,12 +178,6 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
     if (!status.isGranted) {
       await Permission.storage.request();
     }
-  }
-
-  Future<File> _getOutputFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
-    return File(filePath);
   }
 
   @override
@@ -227,7 +216,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                   : () {
                       final date = _dateController.text;
                       if (date.isNotEmpty) {
-                        _generateAndDownloadPdf(date);
+                        _generateAndDisplayPdf(date);
                       } else {
                         setState(() {
                           _message = 'Please select a date';
@@ -236,13 +225,41 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                     },
               child: _isLoading
                   ? CircularProgressIndicator()
-                  : Text('Generate and Download PDF'),
+                  : Text('Generate PDF'),
               style: ElevatedButton.styleFrom(
                 shadowColor: Colors.blueAccent,
                 padding: EdgeInsets.symmetric(vertical: 16),
                 textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
+            SizedBox(height: 20),
+            _pdfBytes != null
+                ? Expanded(
+                    child: PDFView(
+                      pdfData: _pdfBytes,
+                      enableSwipe: true,
+                      swipeHorizontal: true,
+                      autoSpacing: false,
+                      pageFling: true,
+                      pageSnap: true,
+                    ),
+                  )
+                : Container(),
+            SizedBox(height: 20),
+            _pdfBytes != null
+                ? ElevatedButton(
+                    onPressed: () async {
+                      final directory = await getApplicationDocumentsDirectory();
+                      final filePath = '${directory.path}/meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
+                      final file = File(filePath);
+                      await file.writeAsBytes(_pdfBytes!);
+                      setState(() {
+                        _message = 'PDF saved to ${filePath}';
+                      });
+                    },
+                    child: Text('Save PDF'),
+                  )
+                : Container(),
             SizedBox(height: 20),
             Text(
               _message,
