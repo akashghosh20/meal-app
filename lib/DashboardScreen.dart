@@ -39,7 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Uri.parse('${Config.baseUrl}?getstatus'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        'Authorization': '$token',
       },
     );
 

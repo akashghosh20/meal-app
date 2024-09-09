@@ -13,6 +13,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class SelectDateScreen extends StatefulWidget {
   @override
   _SelectDateScreenState createState() => _SelectDateScreenState();
@@ -42,126 +43,128 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
     }
   }
 
-  Future<void> _generateAndDisplayPdf(String date) async {
+ Future<void> _generateAndDisplayPdf(String date) async {
+  setState(() {
+    _isLoading = true;
+    _message = '';
+  });
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('authToken');
+
+  if (token == null) {
     setState(() {
-      _isLoading = true;
-      _message = '';
+      _message = 'Auth token not found';
+      _isLoading = false;
     });
+    return;
+  }
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
+  try {
+    final response = await http.get(
+      Uri.parse('${Config.baseUrl}?printmealstatustoday=$date'),
+      headers: {
+        'Authorization': '$token',
+      },
+    );
 
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-        _isLoading = false;
-      });
-      return;
-    }
+    if (response.statusCode == 200) {
+      final List<dynamic> listData = json.decode(response.body);
 
-    try {
-      final response = await http.get(
-        Uri.parse('${Config.baseUrl}?printmealstatustoday=$date'),
-        headers: {
-          'Authorization': '$token',
-        },
+      final Map<String, List<Map<String, String>>> groupedData = {};
+      for (var item in listData) {
+        if (item is Map<String, dynamic>) {
+          String roomNo = item['roomno'].toString();
+          if (!groupedData.containsKey(roomNo)) {
+            groupedData[roomNo] = [];
+          }
+          groupedData[roomNo]!.add({
+            'name': item['name'].toString(),
+            'lunch': '',
+            'dinner': '',
+          });
+        }
+      }
+
+      final pdf = pw.Document();
+
+      pdf.addPage(
+        pw.MultiPage(
+          build: (pw.Context context) {
+            return [
+              pw.Text(
+                'Meal Status for $date',
+                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 20),
+              ...groupedData.entries.map((entry) {
+                return pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Room No: ${entry.key}',
+                      style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.SizedBox(height: 10),
+                    pw.Table.fromTextArray(
+                      headers: ['Name', 'Lunch', 'Dinner'],
+                      data: entry.value.map((item) {
+                        return [
+                          item['name'],
+                          item['lunch'],
+                          item['dinner'],
+                        ];
+                      }).toList(),
+                    ),
+                    pw.SizedBox(height: 20),
+                  ],
+                );
+              }).toList(),
+            ];
+          },
+        ),
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> listData = json.decode(response.body);
+      _pdfBytes = await pdf.save();
 
-        final Map<String, List<Map<String, String>>> groupedData = {};
-        for (var item in listData) {
-          if (item is Map<String, dynamic>) {
-            String roomNo = item['roomno'].toString();
-            if (!groupedData.containsKey(roomNo)) {
-              groupedData[roomNo] = [];
-            }
-            groupedData[roomNo]!.add({
-              'name': item['name'].toString(),
-              'lunch': '',
-              'dinner': '',
-            });
-          }
-        }
-
-        final pdf = pw.Document();
-
-        pdf.addPage(
-          pw.MultiPage(
-            build: (pw.Context context) {
-              return [
-                pw.Text(
-                  'Meal Status for $date',
-                  style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.SizedBox(height: 20),
-                ...groupedData.entries.map((entry) {
-                  return pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        'Room No: ${entry.key}',
-                        style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-                      ),
-                      pw.SizedBox(height: 10),
-                      pw.Table.fromTextArray(
-                        headers: ['Name', 'Lunch', 'Dinner'],
-                        data: entry.value.map((item) {
-                          return [
-                            item['name'],
-                            item['lunch'],
-                            item['dinner'],
-                          ];
-                        }).toList(),
-                      ),
-                      pw.SizedBox(height: 20),
-                    ],
-                  );
-                }).toList(),
-              ];
-            },
-          ),
-        );
-
-        _pdfBytes = await pdf.save();
-
-        // Get the application documents directory
-        final directory = await getApplicationDocumentsDirectory();
-        final fileName = 'meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
-        final filePath = '${directory.path}/$fileName';
-        
-        // Save the PDF to the documents directory
-        final file = File(filePath);
-        await file.writeAsBytes(_pdfBytes!);
-        
-        // Open the PDF file
-        final result = await OpenFile.open(filePath);
-        if (result.type == result) {
-          setState(() {
-            _message = 'PDF saved and opened successfully to: $filePath';
-          });
-        } else {
-          setState(() {
-            _message = 'Failed to open PDF: ${result.message}';
-          });
-        }
-      } else {
+      // Get the application documents directory
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = 'meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
+      final filePath = '${directory.path}/$fileName';
+      
+      // Save the PDF to the documents directory
+      final file = File(filePath);
+      await file.writeAsBytes(_pdfBytes!);
+      
+      // Open the PDF file
+      try {
+        await OpenFile.open(filePath);
         setState(() {
-          _message = 'Failed to fetch data, status code: ${response.statusCode}';
+          _message = 'PDF saved and opened successfully to: $filePath';
+        });
+      } catch (e) {
+        setState(() {
+          _message = 'Error opening PDF: $e';
         });
       }
-    } catch (e) {
-      print('Error: $e');
+    } else {
       setState(() {
-        _message = 'Error: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
+        _message = 'Failed to fetch data, status code: ${response.statusCode}';
       });
     }
+  } catch (e) {
+    print('Error: $e');
+    setState(() {
+      _message = 'Error: $e';
+    });
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
+
+
 
   Future<void> _requestStoragePermission() async {
     var status = await Permission.storage.status;
