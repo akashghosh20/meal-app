@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,14 +13,19 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   List<dynamic> _payments = [];
   List<dynamic> _filteredPayments = [];
+  List<dynamic> _students = []; // Add this line
   bool _isLoading = true;
   String _message = '';
   String _searchQuery = '';
+  String? amount, date, note;
+  String? selectedStudentId;
+  String? _paymentIdToEdit; // Store ID of the payment being edited
 
   @override
   void initState() {
     super.initState();
     _fetchPayments();
+    _fetchStudents();
   }
 
   Future<void> _fetchPayments() async {
@@ -64,6 +68,98 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
+  Future<void> _fetchStudents() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    if (token == null) {
+      setState(() {
+        _message = 'Auth token not found';
+        return;
+      });
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('${Config.baseUrl}?students'),
+        headers: {
+          'Authorization': '$token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _students = json.decode(response.body); // Initialize _students here
+        });
+      } else {
+        setState(() {
+          _message = 'Failed to fetch students';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _message = 'Error: $e';
+      });
+    }
+  }
+
+  Future<void> _addOrUpdatePayment({String? paymentId}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    if (token == null) {
+      setState(() {
+        _message = 'Auth token not found';
+        return;
+      });
+    }
+
+    if (selectedStudentId == null) {
+      setState(() {
+        _message = 'Please select a student';
+        return;
+      });
+    }
+
+    final paymentData = {
+      'stdid': selectedStudentId,
+      'amount': amount,
+      'date': date,
+      'note': note ?? '',
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(paymentId != null
+            ? '${Config.baseUrl}?updatepayment' // Endpoint for updating payment
+            : '${Config.baseUrl}?insertpayment'),
+        headers: {
+          'Authorization': '$token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(paymentId != null
+            ? {'id': paymentId, ...paymentData} // Include ID for update
+            : paymentData),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _message = 'Payment processed successfully';
+          _fetchPayments(); // Refresh the payments list
+          _paymentIdToEdit = null; // Reset edit ID
+        });
+      } else {
+        setState(() {
+          _message = 'Failed to process payment';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _message = 'Error: $e';
+      });
+    }
+  }
+
   void _filterPayments(String query) {
     setState(() {
       _searchQuery = query;
@@ -71,86 +167,259 @@ class _PaymentScreenState extends State<PaymentScreen> {
         final nameLower = payment['name'].toLowerCase();
         final roomNoLower = payment['roomno'].toString().toLowerCase();
         final hallNoLower = payment['hallid'].toString().toLowerCase();
-        final amountLower = payment['amount'].toString().toLowerCase();
-        final dateLower = payment['date'].toLowerCase();
         final searchLower = _searchQuery.toLowerCase();
 
         return nameLower.contains(searchLower) ||
             roomNoLower.contains(searchLower) ||
-            hallNoLower.contains(searchLower) ||
-            amountLower.contains(searchLower) ||
-            dateLower.contains(searchLower);
+            hallNoLower.contains(searchLower);
       }).toList();
     });
+  }
+
+  void _showEditPaymentDialog(Map<String, dynamic> payment) {
+    final amountController = TextEditingController(text: payment['amount'].toString());
+    final dateController = TextEditingController(text: payment['date']);
+    final noteController = TextEditingController(text: payment['note']);
+
+    setState(() {
+      _paymentIdToEdit = payment['id']; // Store ID for edit
+    });
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Payment'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Student Name',
+                border: OutlineInputBorder(),
+              ),
+              controller: TextEditingController(text: payment['name']),
+              readOnly: true,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Room No',
+                border: OutlineInputBorder(),
+              ),
+              controller: TextEditingController(text: payment['roomno'].toString()),
+              readOnly: true,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              controller: amountController,
+              onChanged: (value) {
+                setState(() {
+                  amount = value;
+                });
+              },
+            ),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Date',
+                border: OutlineInputBorder(),
+              ),
+              controller: dateController,
+              onChanged: (value) {
+                setState(() {
+                  date = value;
+                });
+              },
+            ),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Note',
+                border: OutlineInputBorder(),
+              ),
+              controller: noteController,
+              onChanged: (value) {
+                setState(() {
+                  note = value;
+                });
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                _paymentIdToEdit = null; // Reset edit ID on cancel
+              });
+            },
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _addOrUpdatePayment(paymentId: _paymentIdToEdit);
+              Navigator.of(context).pop();
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddPaymentDialog() {
+    final amountController = TextEditingController();
+    final dateController = TextEditingController();
+    final noteController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Add Payment'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              value: selectedStudentId,
+              decoration: InputDecoration(
+                labelText: 'Select Student',
+                border: OutlineInputBorder(),
+              ),
+              items: _students.map((student) {
+                return DropdownMenuItem<String>(
+                  value: student['id'],
+                  child: Text(student['name']),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedStudentId = value;
+                });
+              },
+            ),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Amount',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              controller: amountController,
+              onChanged: (value) {
+                setState(() {
+                  amount = value;
+                });
+              },
+            ),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Date',
+                border: OutlineInputBorder(),
+              ),
+              controller: dateController,
+              onChanged: (value) {
+                setState(() {
+                  date = value;
+                });
+              },
+            ),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Note',
+                border: OutlineInputBorder(),
+              ),
+              controller: noteController,
+              onChanged: (value) {
+                setState(() {
+                  note = value;
+                });
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _addOrUpdatePayment();
+              Navigator.of(context).pop();
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payments',style: TextStyle(color: Colors.amber),),
-        shadowColor: Colors.purple,
-        backgroundColor: Colors.purple,
-
-        centerTitle: true,
+        title: Text('Payments'),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                labelText: 'Search',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.search),
-              ),
-              onChanged: _filterPayments,
-            ),
-          ),
-          Expanded(
-            child: _isLoading
-                ? Center(child: GFLoader(type: GFLoaderType.circle,))
-                : _filteredPayments.isEmpty
-                    ? Center(child: Text(_message.isNotEmpty ? _message : 'No payments found'))
-                    : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: DataTable(
-                          columns: const [
-                            DataColumn(label: Text('Hall No')),
-                            DataColumn(label: Text('Room No')),
-                            DataColumn(label: Text('Name')),
-                            DataColumn(label: Text('Amount')),
-                            DataColumn(label: Text('Date')),
-                            DataColumn(label: Text('Edit')),
-                          ],
-                          rows: _filteredPayments.map((payment) {
-                            return DataRow(cells: [
-                              DataCell(Text(payment['hallid'].toString())),
-                              DataCell(Text(payment['roomno'].toString())),
-                              DataCell(Text(payment['name'].toString())),
-                              DataCell(Text(payment['amount'].toString())),
-                              DataCell(Text(payment['date'].toString())),
-                              DataCell(
-                                ElevatedButton(
-                                  onPressed: () {
-                                    // Implement the edit functionality
-                                  },
-                                  child: Text('Edit'),
-                                ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Search Payments',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: _filterPayments,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: _showAddPaymentDialog,
+                    child: Text('Add Payment'),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columns: [
+                        DataColumn(label: Text('ID')),
+                        DataColumn(label: Text('Name')),
+                        DataColumn(label: Text('Room No')),
+                        DataColumn(label: Text('Amount')),
+                        DataColumn(label: Text('Date')),
+                        DataColumn(label: Text('Note')),
+                        DataColumn(label: Text('Actions')),
+                      ],
+                      rows: _filteredPayments.map((payment) {
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(payment['id'].toString())),
+                            DataCell(Text(payment['name'])),
+                            DataCell(Text(payment['roomno'].toString())),
+                            DataCell(Text(payment['amount'].toString())),
+                            DataCell(Text(payment['date'])),
+                            DataCell(Text(payment['note'] ?? '')),
+                            DataCell(
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () => _showEditPaymentDialog(payment),
                               ),
-                            ]);
-                          }).toList(),
-                        ),
-                      ),
-          ),
-        ],
-      ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: PaymentScreen(),
-  ));
 }

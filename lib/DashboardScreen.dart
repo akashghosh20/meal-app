@@ -11,7 +11,7 @@ import 'package:mealapp/PeopleScreen.dart';
 import 'package:mealapp/PrintSheetScreen.dart';
 import 'package:mealapp/SpentsEntry.dart';
 import 'package:mealapp/config.dart';
-import 'package:shared_preferences/shared_preferences.dart';  // Import the PeopleScreen file
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -39,7 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Uri.parse('${Config.baseUrl}?getstatus'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': '$token',
+        'Authorization': 'Bearer $token',
       },
     );
 
@@ -162,7 +162,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
-            // Add more sidebar items here if needed
           ],
         ),
       ),
@@ -197,8 +196,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _buildSummaryCard('Total Received Payment', totalReceivePayment),
                   _buildSummaryCard('Total Spent', totalSpent),
                   _buildSummaryCard('Total Meal', totalMeal),
-                  _buildSummaryCard('Meal Rate', mealRate.toStringAsFixed(2)),
-                  _buildSummaryCard('Hand Cash', handCash.toString()),
+                  _buildSummaryCard('Meal Rate', mealRate),
+                  _buildSummaryCard('Hand Cash', handCash),
                   SizedBox(height: 20),
                   Text(
                     'Meal Status Over Time',
@@ -217,7 +216,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value) {
+  Widget _buildSummaryCard(String title, dynamic value) {
+    String displayValue;
+
+    // Print debug information
+    print('Title: $title');
+    print('Value: $value');
+    print('Type of value: ${value.runtimeType}');
+
+    try {
+      if (value is double) {
+        // If value is a double, format it
+        displayValue = value.toStringAsFixed(2);
+      } else if (value is String) {
+        // If value is a string, try to parse it to double
+        double? parsedValue = double.tryParse(value);
+        if (parsedValue != null) {
+          displayValue = parsedValue.toStringAsFixed(2);
+        } else {
+          displayValue = value;
+        }
+      } else {
+        // Handle other types or default to string conversion
+        displayValue = value.toString();
+      }
+    } catch (e) {
+      displayValue = 'Error: $e';
+    }
+
     return Card(
       elevation: 4,
       margin: EdgeInsets.symmetric(vertical: 8),
@@ -231,7 +257,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: TextStyle(fontSize: 18),
             ),
             Text(
-              value,
+              displayValue,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
@@ -270,16 +296,14 @@ void main() {
     home: DashboardScreen(),
     routes: {
       '/dashboard': (context) => DashboardScreen(),
-      '/people': (context) => PeopleScreen(), 
-      '/insertspents':(context) => InsertSpentsScreen(),
-      '/get-spents':(context) => GetSpentsScreen(),
-      '/print-sheets':(context) => SelectDateScreen(),
-      '/get-students':(context) => StudentsScreen(),
-      '/get-allpayments':(context) => PaymentScreen(),
-      '/insert-meals':(context) => InsertMealScreen(),
-      '/add_mealday':(context) => CreateMealDayScreen()
-      
-      // Register the new route
+      '/people': (context) => PeopleScreen(),
+      '/insertspents': (context) => InsertSpentsScreen(),
+      '/get-spents': (context) => GetSpentsScreen(),
+      '/print-sheets': (context) => SelectDateScreen(),
+      '/get-students': (context) => StudentsScreen(),
+      '/get-allpayments': (context) => PaymentScreen(),
+      '/insert-meals': (context) => InsertMealScreen(),
+      '/add_mealday': (context) => CreateMealDayScreen(),
     },
   ));
 }

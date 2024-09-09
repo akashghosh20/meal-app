@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart'; // Import the PDF viewer package
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mealapp/config.dart';
+import 'package:open_file/open_file.dart'; // Import the open_file package
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
@@ -69,7 +69,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
 
       if (response.statusCode == 200) {
         final List<dynamic> listData = json.decode(response.body);
-        
+
         final Map<String, List<Map<String, String>>> groupedData = {};
         for (var item in listData) {
           if (item is Map<String, dynamic>) {
@@ -125,44 +125,34 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
         );
 
         _pdfBytes = await pdf.save();
-        setState(() {
-          // Clear the path if using bytes
-        });
 
-        // Request storage permission
-        await _requestStoragePermission();
-
-        // Open a directory picker
-        final result = await FilePicker.platform.getDirectoryPath();
-
-        if (result != null) {
-          try {
-            // Path to save the PDF
-            final newFilePath = '${result}/meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
-            
-            // Save the PDF to the selected directory
-            final file = File(newFilePath);
-            await file.writeAsBytes(_pdfBytes!);
-            
-            setState(() {
-              _message = 'PDF downloaded successfully to: $newFilePath';
-            });
-          } catch (e) {
-            setState(() {
-              _message = 'Error while downloading PDF: $e';
-            });
-          }
+        // Get the application documents directory
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName = 'meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
+        final filePath = '${directory.path}/$fileName';
+        
+        // Save the PDF to the documents directory
+        final file = File(filePath);
+        await file.writeAsBytes(_pdfBytes!);
+        
+        // Open the PDF file
+        final result = await OpenFile.open(filePath);
+        if (result.type == result) {
+          setState(() {
+            _message = 'PDF saved and opened successfully to: $filePath';
+          });
         } else {
           setState(() {
-            _message = 'No directory selected.';
+            _message = 'Failed to open PDF: ${result.message}';
           });
         }
       } else {
         setState(() {
-          _message = 'Failed to fetch data';
+          _message = 'Failed to fetch data, status code: ${response.statusCode}';
         });
       }
     } catch (e) {
+      print('Error: $e');
       setState(() {
         _message = 'Error: $e';
       });
@@ -243,21 +233,6 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                       pageFling: true,
                       pageSnap: true,
                     ),
-                  )
-                : Container(),
-            SizedBox(height: 20),
-            _pdfBytes != null
-                ? ElevatedButton(
-                    onPressed: () async {
-                      final directory = await getApplicationDocumentsDirectory();
-                      final filePath = '${directory.path}/meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
-                      final file = File(filePath);
-                      await file.writeAsBytes(_pdfBytes!);
-                      setState(() {
-                        _message = 'PDF saved to ${filePath}';
-                      });
-                    },
-                    child: Text('Save PDF'),
                   )
                 : Container(),
             SizedBox(height: 20),

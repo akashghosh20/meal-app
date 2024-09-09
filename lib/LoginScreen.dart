@@ -54,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final bloodgroup = responseData['bloodgroup'];
     final password = _passwordController.text;
     final image_link = responseData['image'];
+    final studentid = responseData['id'];
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('AuthToken', token); // Storing the correct token
@@ -66,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await prefs.setString('bloodgroup', bloodgroup);
     await prefs.setString('password', password);
     await prefs.setString('image_link', image_link);
+    await prefs.setString('studentid', studentid);
 
     Navigator.pushReplacement(
       context,
