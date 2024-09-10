@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -364,7 +365,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         title: Text('Payments'),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: GFLoader(type: GFLoaderType.square,))
           : Column(
               children: [
                 Padding(

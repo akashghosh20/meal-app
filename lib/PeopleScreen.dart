@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -15,11 +16,18 @@ class _PeopleScreenState extends State<PeopleScreen> {
   late Future<List<dynamic>> _peopleData;
   List<dynamic> _filteredPeople = [];
   String _searchQuery = '';
+  Timer? _debounce;  // Timer for debounce
 
   @override
   void initState() {
     super.initState();
     _peopleData = fetchPeopleData();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();  // Cancel the debounce timer when the widget is disposed
+    super.dispose();
   }
 
   Future<List<dynamic>> fetchPeopleData() async {
@@ -43,6 +51,16 @@ class _PeopleScreenState extends State<PeopleScreen> {
     } else {
       throw Exception('Failed to load people data');
     }
+  }
+
+  void _onSearchChanged(String query, List<dynamic> people) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _searchQuery = query;
+      });
+      _filterPeople(people);
+    });
   }
 
   void _filterPeople(List<dynamic> people) {
@@ -70,7 +88,7 @@ class _PeopleScreenState extends State<PeopleScreen> {
         future: _peopleData,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: GFLoader(type: GFLoaderType.square,));
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
@@ -88,10 +106,7 @@ class _PeopleScreenState extends State<PeopleScreen> {
                   child: GFSearchBar(
                     searchList: people,
                     searchQueryBuilder: (query, list) {
-                      setState(() {
-                        _searchQuery = query;
-                      });
-                      _filterPeople(people);
+                      _onSearchChanged(query, people);  // Call debounce method
                       return _filteredPeople.map((item) => item['name']).toList();
                     },
                     overlaySearchListItemBuilder: (dynamic item) => Container(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -16,11 +17,18 @@ class _StudentsScreenState extends State<StudentsScreen> {
   bool _isLoading = false;
   String _message = '';
   String _searchQuery = '';
+  Timer? _debounce;  // Timer for debounce
 
   @override
   void initState() {
     super.initState();
     _fetchStudents();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();  // Dispose of the debounce timer when the widget is disposed
+    super.dispose();
   }
 
   Future<void> _fetchStudents() async {
@@ -69,6 +77,16 @@ class _StudentsScreenState extends State<StudentsScreen> {
     }
   }
 
+  void _onSearchChanged(String query) {
+    // Cancel the previous debounce timer and start a new one
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+
+    _debounce = Timer(Duration(milliseconds: 500), () {
+      // Trigger the search after 500ms delay
+      _filterStudents(query);
+    });
+  }
+
   void _filterStudents(String query) {
     setState(() {
       _searchQuery = query;
@@ -103,7 +121,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.search),
                     ),
-                    onChanged: _filterStudents,
+                    onChanged: _onSearchChanged,  // Use debounce for search
                   ),
                 ),
                 Expanded(
@@ -155,8 +173,4 @@ class _StudentsScreenState extends State<StudentsScreen> {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: StudentsScreen(),
-  ));
-}
+

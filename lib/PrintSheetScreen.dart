@@ -3,16 +3,16 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart'; // Import the PDF viewer package
+import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mealapp/config.dart';
-import 'package:open_file/open_file.dart'; // Import the open_file package
 import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart'; // Import pdf for specifying paper size
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart'; // Import share_plus
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class SelectDateScreen extends StatefulWidget {
   @override
@@ -43,128 +43,145 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
     }
   }
 
- Future<void> _generateAndDisplayPdf(String date) async {
-  setState(() {
-    _isLoading = true;
-    _message = '';
-  });
-
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('authToken');
-
-  if (token == null) {
+    Future<void> _generateAndDisplayPdf(String date) async {
     setState(() {
-      _message = 'Auth token not found';
-      _isLoading = false;
+      _isLoading = true;
+      _message = '';
     });
-    return;
-  }
 
-  try {
-    final response = await http.get(
-      Uri.parse('${Config.baseUrl}?printmealstatustoday=$date'),
-      headers: {
-        'Authorization': '$token',
-      },
-    );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
 
-    if (response.statusCode == 200) {
-      final List<dynamic> listData = json.decode(response.body);
+    if (token == null) {
+      setState(() {
+        _message = 'Auth token not found';
+        _isLoading = false;
+      });
+      return;
+    }
 
-      final Map<String, List<Map<String, String>>> groupedData = {};
-      for (var item in listData) {
-        if (item is Map<String, dynamic>) {
-          String roomNo = item['roomno'].toString();
-          if (!groupedData.containsKey(roomNo)) {
-            groupedData[roomNo] = [];
-          }
-          groupedData[roomNo]!.add({
-            'name': item['name'].toString(),
-            'lunch': '',
-            'dinner': '',
-          });
-        }
-      }
-
-      final pdf = pw.Document();
-
-      pdf.addPage(
-        pw.MultiPage(
-          build: (pw.Context context) {
-            return [
-              pw.Text(
-                'Meal Status for $date',
-                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-              ),
-              pw.SizedBox(height: 20),
-              ...groupedData.entries.map((entry) {
-                return pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      'Room No: ${entry.key}',
-                      style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-                    ),
-                    pw.SizedBox(height: 10),
-                    pw.Table.fromTextArray(
-                      headers: ['Name', 'Lunch', 'Dinner'],
-                      data: entry.value.map((item) {
-                        return [
-                          item['name'],
-                          item['lunch'],
-                          item['dinner'],
-                        ];
-                      }).toList(),
-                    ),
-                    pw.SizedBox(height: 20),
-                  ],
-                );
-              }).toList(),
-            ];
-          },
-        ),
+    try {
+      final response = await http.get(
+        Uri.parse('${Config.baseUrl}?printmealstatustoday=$date'),
+        headers: {
+          'Authorization': '$token',
+        },
       );
 
-      _pdfBytes = await pdf.save();
+      if (response.statusCode == 200) {
+        final List<dynamic> listData = json.decode(response.body);
 
-      // Get the application documents directory
-      final directory = await getApplicationDocumentsDirectory();
-      final fileName = 'meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
-      final filePath = '${directory.path}/$fileName';
-      
-      // Save the PDF to the documents directory
-      final file = File(filePath);
-      await file.writeAsBytes(_pdfBytes!);
-      
-      // Open the PDF file
-      try {
-        await OpenFile.open(filePath);
+        final Map<String, List<Map<String, String>>> groupedData = {};
+        for (var item in listData) {
+          if (item is Map<String, dynamic>) {
+            String roomNo = item['roomno'].toString();
+            if (!groupedData.containsKey(roomNo)) {
+              groupedData[roomNo] = [];
+            }
+
+            // Logic for status mapping
+            String lunchStatus = (item['statusnow'] == '1' && item['type'] == '1') ? 'Present' : 'Absent';
+            String dinnerStatus = (item['statusnow'] == '1' && item['type'] == '2') ? 'Present' : 'Absent';
+
+            groupedData[roomNo]!.add({
+              'name': item['name'].toString(),
+              'lunch': lunchStatus,
+              'dinner': dinnerStatus,
+            });
+          }
+        }
+
+        final pdf = pw.Document();
+
+        // Add A4 size page and dynamically design the table to fill the page
+        pdf.addPage(
+          pw.MultiPage(
+            pageFormat: PdfPageFormat.a4, // Set A4 paper size
+            build: (pw.Context context) {
+              return [
+                pw.Text(
+                  'Meal Status for $date',
+                  style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.SizedBox(height: 20),
+                ...groupedData.entries.map((entry) {
+                  return pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Room No: ${entry.key}',
+                        style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                      ),
+                      pw.SizedBox(height: 10),
+                      pw.Table.fromTextArray(
+                        headers: ['Name', 'Lunch', 'Dinner'],
+                        border: pw.TableBorder.all(),
+                        cellStyle: pw.TextStyle(fontSize: 12),
+                        headerStyle: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                        cellAlignment: pw.Alignment.center,
+                        columnWidths: {
+                          0: const pw.FlexColumnWidth(3),
+                          1: const pw.FlexColumnWidth(1),
+                          2: const pw.FlexColumnWidth(1),
+                        },
+                        data: entry.value.map((item) {
+                          return [
+                            item['name'],
+                            item['lunch'] ?? '',
+                            item['dinner'] ?? '',
+                          ];
+                        }).toList(),
+                      ),
+                      pw.SizedBox(height: 20),
+                    ],
+                  );
+                }).toList(),
+              ];
+            },
+          ),
+        );
+
+        _pdfBytes = await pdf.save();
+
+        // Get the application documents directory
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName = 'meal_status_${DateFormat('yyyyMMdd').format(_selectedDate)}.pdf';
+        final filePath = '${directory.path}/$fileName';
+
+        // Save the PDF to the documents directory
+        final file = File(filePath);
+        await file.writeAsBytes(_pdfBytes!);
+
+        // Share the PDF file
+        await _sharePdfFile(filePath);
+
         setState(() {
-          _message = 'PDF saved and opened successfully to: $filePath';
+          _message = 'PDF generated successfully and shared!';
         });
-      } catch (e) {
+      } else {
         setState(() {
-          _message = 'Error opening PDF: $e';
+          _message = 'Failed to fetch data, status code: ${response.statusCode}';
         });
       }
-    } else {
+    } catch (e) {
       setState(() {
-        _message = 'Failed to fetch data, status code: ${response.statusCode}';
+        _message = 'Error: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
-  } catch (e) {
-    print('Error: $e');
-    setState(() {
-      _message = 'Error: $e';
-    });
-  } finally {
-    setState(() {
-      _isLoading = false;
-    });
   }
-}
 
 
+  Future<void> _sharePdfFile(String filePath) async {
+    try {
+      await Share.shareXFiles([XFile(filePath)], text: 'Check out this PDF');
+    } catch (e) {
+      print('Error sharing file: $e');
+    }
+  }
 
   Future<void> _requestStoragePermission() async {
     var status = await Permission.storage.status;
@@ -177,7 +194,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Generate and Download PDF'),
+        title: Text('Generate and Share PDF'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -217,7 +234,7 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                       }
                     },
               child: _isLoading
-                  ? CircularProgressIndicator()
+                  ? GFLoader(type: GFLoaderType.square,)
                   : Text('Generate PDF'),
               style: ElevatedButton.styleFrom(
                 shadowColor: Colors.blueAccent,
@@ -225,19 +242,6 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
                 textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 20),
-            _pdfBytes != null
-                ? Expanded(
-                    child: PDFView(
-                      pdfData: _pdfBytes,
-                      enableSwipe: true,
-                      swipeHorizontal: true,
-                      autoSpacing: false,
-                      pageFling: true,
-                      pageSnap: true,
-                    ),
-                  )
-                : Container(),
             SizedBox(height: 20),
             Text(
               _message,
@@ -249,13 +253,4 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: SelectDateScreen(),
-    routes: {
-      '/print-sheets': (context) => SelectDateScreen(),
-    },
-  ));
 }

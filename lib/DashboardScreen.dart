@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
+import 'package:mealapp/Account.dart';
 import 'package:mealapp/CreateMealDay.dart';
 import 'package:mealapp/GetAllPayments.dart';
 import 'package:mealapp/GetSpents.dart';
@@ -54,26 +56,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard'),
+        title: Text('Dashboard',style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.red,
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
+            
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: const Color.fromARGB(255, 248, 18, 18),
               ),
-              child: Text(
-                'Dashboard Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Image.asset(
+                'Assets/meclogo.png', // Replace with your logo path
+                height: 120,
+                width: 120,
               ),
+              
             ),
             ListTile(
-              leading: Icon(Icons.dashboard),
+              leading: Icon(Icons.dashboard,color: Colors.white,),
               title: Text('Dashboard'),
               onTap: () {
                 Navigator.pushReplacement(
@@ -153,6 +156,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
+              leading: Icon(Icons.insert_chart),
+              title: Text('Account'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AccountPage()),
+                );
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.add_box),
               title: Text('Meal Day'),
               onTap: () {
@@ -169,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         future: _dashboardData,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: GFLoader(type: GFLoaderType.square,));
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data == null) {
