@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart'; // Import GetWidget package
 import 'package:mealapp/LoginScreen.dart';
-
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -45,6 +45,10 @@ class _SplashScreenState extends State<SplashScreen> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
+              ),
+              SizedBox(height: 20),
+              GFLoader(
+                type: GFLoaderType.square,
               ),
             ],
           ),
