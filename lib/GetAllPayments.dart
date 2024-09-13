@@ -33,14 +33,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-        _isLoading = false;
-      });
-      return;
-    }
-
     try {
       final response = await http.get(
         Uri.parse('${Config.baseUrl}?getallpayment'),
@@ -73,13 +65,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-        return;
-      });
-    }
-
     try {
       final response = await http.get(
         Uri.parse('${Config.baseUrl}?students'),
@@ -107,13 +92,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _addOrUpdatePayment({String? paymentId}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
-
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-        return;
-      });
-    }
 
     if (selectedStudentId == null) {
       setState(() {

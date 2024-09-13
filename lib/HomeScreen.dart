@@ -55,10 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('AuthToken');
 
-    if (token == null) {
-      throw Exception('Authentication token is missing');
-    }
-
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?managers'),
       headers: {
@@ -78,10 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<Map<String, dynamic>> fetchMealData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('AuthToken');
-
-    if (token == null) {
-      throw Exception('Authentication token is missing');
-    }
 
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?getmeal'),
@@ -123,14 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('AuthToken');
-
-  if (token == null) {
-    setState(() {
-      _message = 'Auth token not found';
-      is_uploading = false;
-    });
-    return;
-  }
 
   try {
     final request = http.MultipartRequest(

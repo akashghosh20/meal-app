@@ -30,16 +30,11 @@ class _AccountPageState extends State<AccountPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedToken = prefs.getString('authToken');
 
-    if (savedToken != null) {
-      setState(() {
-        token = savedToken;
-      });
-      fetchMealData(savedToken);
-    } else {
-      // Handle the case where the token is not found
-      print('Token not found');
+    setState(() {
+      token = savedToken!;
+    });
+    fetchMealData(savedToken!);
     }
-  }
 
   Future<void> fetchMealData(String token) async {
     final response = await http.get(

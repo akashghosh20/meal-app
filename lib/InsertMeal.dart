@@ -33,13 +33,6 @@ class _InsertMealScreenState extends State<InsertMealScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-      });
-      return;
-    }
-
     try {
       final response = await http.get(
         Uri.parse('${Config.baseUrl}?students'),
@@ -79,14 +72,6 @@ class _InsertMealScreenState extends State<InsertMealScreen> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
-
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-        _isLoading = false;
-      });
-      return;
-    }
 
     // Get the student details for hallId and calculate mealDayId
     final selectedStudent = _students.firstWhere((student) => student['id'].toString() == _selectedStudent);

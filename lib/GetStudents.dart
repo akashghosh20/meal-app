@@ -40,14 +40,6 @@ class _StudentsScreenState extends State<StudentsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-        _isLoading = false;
-      });
-      return;
-    }
-
     try {
       final response = await http.get(
         Uri.parse('${Config.baseUrl}/?students'),

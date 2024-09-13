@@ -35,9 +35,9 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
       lastDate: DateTime(2101),
     );
 
-    if (pickedDate != null && pickedDate != initialDate) {
+    if (pickedDate != initialDate) {
       setState(() {
-        _selectedDate = pickedDate;
+        _selectedDate = pickedDate!;
         _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
       });
     }
@@ -51,14 +51,6 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
-
-    if (token == null) {
-      setState(() {
-        _message = 'Auth token not found';
-        _isLoading = false;
-      });
-      return;
-    }
 
     try {
       final response = await http.get(

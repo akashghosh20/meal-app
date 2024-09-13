@@ -34,10 +34,6 @@ class _PeopleScreenState extends State<PeopleScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    if (token == null) {
-      throw Exception('Token not found');
-    }
-
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?all'),
       headers: {

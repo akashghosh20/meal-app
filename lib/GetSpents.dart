@@ -24,10 +24,6 @@ class _GetSpentsScreenState extends State<GetSpentsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    if (token == null) {
-      throw Exception('Token not found');
-    }
-
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?getspents'),
       headers: {

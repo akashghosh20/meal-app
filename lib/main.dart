@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:mealapp/LoginScreen.dart';
 import 'package:mealapp/SplashScreen.dart';
-
+import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: SplashScreen(), // Set SplashScreen as the initial route
-     
+      routes: {
+      '/login': (context) => LoginScreen(),
+      },
+
     );
   }
 }

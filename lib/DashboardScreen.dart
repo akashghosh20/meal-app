@@ -9,6 +9,7 @@ import 'package:mealapp/GetAllPayments.dart';
 import 'package:mealapp/GetSpents.dart';
 import 'package:mealapp/GetStudents.dart';
 import 'package:mealapp/InsertMeal.dart';
+import 'package:mealapp/LoginScreen.dart';
 import 'package:mealapp/PeopleScreen.dart';
 import 'package:mealapp/PrintSheetScreen.dart';
 import 'package:mealapp/SpentsEntry.dart';
@@ -32,10 +33,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<Map<String, dynamic>> fetchDashboardData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
-
-    if (token == null) {
-      throw Exception('Token not found');
-    }
 
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?getstatus'),
@@ -66,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             
             DrawerHeader(
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 248, 18, 18),
+                color: const Color.fromARGB(255, 146, 151, 182),
               ),
               child: Image.asset(
                 'Assets/meclogo.png', // Replace with your logo path
@@ -76,7 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               
             ),
             ListTile(
-              leading: Icon(Icons.dashboard,color: Colors.white,),
+              leading: Icon(Icons.dashboard_outlined,),
               title: Text('Dashboard'),
               onTap: () {
                 Navigator.pushReplacement(
@@ -146,7 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.insert_chart),
+              leading: Icon(Icons.add_box_outlined),
               title: Text('Insert Meals'),
               onTap: () {
                 Navigator.push(
@@ -156,7 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.insert_chart),
+              leading: Icon(Icons.account_balance_wallet),
               title: Text('Account'),
               onTap: () {
                 Navigator.push(
@@ -166,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.add_box),
+              leading: Icon(Icons.medication_liquid_rounded),
               title: Text('Meal Day'),
               onTap: () {
                 Navigator.push(
@@ -175,6 +172,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
+            ListTile(
+              leading: Icon(Icons.settings_power_outlined),
+              title: Text('Log out'),
+              onTap: () {
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (rooute)=>false);
+              },
+            )
           ],
         ),
       ),

@@ -29,10 +29,6 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('AuthToken');
 
-    if (token == null) {
-      throw Exception('Authentication token is missing');
-    }
-
     final response = await http.get(
       Uri.parse('${Config.baseUrl}?getmealofmanager=${widget.managerId}'),
       headers: {
@@ -57,10 +53,6 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
   Future<void> updateMealCount(String date, int newMealCount) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('AuthToken');
-
-    if (token == null) {
-      throw Exception('Authentication token is missing');
-    }
 
     try {
       final response = await http.post(

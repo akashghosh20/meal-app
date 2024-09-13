@@ -25,14 +25,6 @@ class _InsertSpentsScreenState extends State<InsertSpentsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    if (token == null) {
-      setState(() {
-        _message = 'Token not found';
-        _isLoading = false;
-      });
-      return;
-    }
-
     final response = await http.post(
       Uri.parse('${Config.baseUrl}/?insertspents'),
       headers: {
@@ -73,9 +65,9 @@ class _InsertSpentsScreenState extends State<InsertSpentsScreen> {
       lastDate: DateTime(2101),
     );
 
-    if (pickedDate != null && pickedDate != initialDate) {
+    if (pickedDate != initialDate) {
       setState(() {
-        _dateController.text = "${pickedDate.toLocal()}".split(' ')[0];
+        _dateController.text = "${pickedDate?.toLocal()}".split(' ')[0];
       });
     }
   }
