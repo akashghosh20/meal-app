@@ -54,7 +54,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Dashboard',style: TextStyle(color: Colors.white),),
-        backgroundColor: Colors.red,
+        backgroundColor:const Color.fromARGB(255, 146, 151, 182),
       ),
       drawer: Drawer(
         child: ListView(
@@ -175,8 +175,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListTile(
               leading: Icon(Icons.settings_power_outlined),
               title: Text('Log out'),
-              onTap: () {
-                Navigator.pushNamedAndRemoveUntil(context, '/login', (rooute)=>false);
+              onTap: () async{
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (route)=>false);
               },
             )
           ],
