@@ -18,10 +18,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: SplashScreen(), // Set SplashScreen as the initial route
-      routes: {
+       routes: {
       '/login': (context) => LoginScreen(),
-      },
-
+    },
     );
   }
 }

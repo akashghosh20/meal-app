@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:getwidget/components/loader/gf_loader.dart';
+import 'package:getwidget/types/gf_loader_type.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealapp/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -99,68 +101,88 @@ class _StudentsScreenState extends State<StudentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Students'),
+        title: Text('Students',  style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search by name, hall ID, or room number',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: _onSearchChanged,  // Use debounce for search
-                  ),
-                ),
-                Expanded(
-                  child: _filteredStudents.isEmpty
-                      ? Center(
-                          child: Text(
-                            _message.isNotEmpty
-                                ? _message
-                                : 'No students found.',
-                            style: TextStyle(fontSize: 18),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: _isLoading ? Center(child: GFLoader(type: GFLoaderType.circle,)) : Column(
+                children: [
+                  SizedBox(height: 10,),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Search by name, hall ID, or room number',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                          color: Colors.orange,
+                          width: 5
+                          )
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(
+                          color: Colors.green, // Border color when focused
+                          width: 2.0,
                           ),
-                        )
-                      : ListView.builder(
-                          padding: EdgeInsets.all(16.0),
-                          itemCount: _filteredStudents.length,
-                          itemBuilder: (context, index) {
-                            final student = _filteredStudents[index];
-                            return Card(
-                              margin: EdgeInsets.symmetric(vertical: 8.0),
-                              child: ListTile(
-                                title: Text(
-                                  student['name'] ?? 'No Name',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                        ),
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: _onSearchChanged,  // Use debounce for search
+                    ),
+                  ),
+                  Expanded(
+                    child: _filteredStudents.isEmpty
+                        ? Center(
+                            child: Text(
+                              _message.isNotEmpty
+                                  ? _message
+                                  : 'No students found.',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: EdgeInsets.all(16.0),
+                            itemCount: _filteredStudents.length,
+                            itemBuilder: (context, index) {
+                              final student = _filteredStudents[index];
+                              return Card(
+                                margin: EdgeInsets.symmetric(vertical: 8.0),
+                                child: ListTile(
+                                  title: Text(
+                                    student['name'] ?? 'No Name',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (student['roomno'] != null)
+                                        Text('Room No: ${student['roomno']}'),
+                                      if (student['email'] != null)
+                                        Text('Email: ${student['email']}'),
+                                      if (student['phone'] != null)
+                                        Text('Phone: ${student['phone']}'),
+                                      if (student['bloodgroup'] != null)
+                                        Text(
+                                            'Blood Group: ${student['bloodgroup']}'),
+                                    ],
                                   ),
                                 ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (student['roomno'] != null)
-                                      Text('Room No: ${student['roomno']}'),
-                                    if (student['email'] != null)
-                                      Text('Email: ${student['email']}'),
-                                    if (student['phone'] != null)
-                                      Text('Phone: ${student['phone']}'),
-                                    if (student['bloodgroup'] != null)
-                                      Text(
-                                          'Blood Group: ${student['bloodgroup']}'),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ],
-            ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

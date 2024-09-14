@@ -340,65 +340,93 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payments'),
+        title: Text('Payments', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: _isLoading
-          ? Center(child: GFLoader(type: GFLoaderType.square,))
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Search Payments',
-                      border: OutlineInputBorder(),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: _isLoading
+            ? Center(child: GFLoader(type: GFLoaderType.circle,))
+            : Column(
+                children: [
+                  SizedBox(height: 10,),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelText: 'Search Payments',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                          color: Colors.orange,
+                          width: 5
+                          )
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          borderSide: BorderSide(
+                          color: Colors.green, // Border color when focused
+                          width: 2.0,
+                          ),
+                        ),
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: _filterPayments,
                     ),
-                    onChanged: _filterPayments,
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    onPressed: _showAddPaymentDialog,
-                    child: Text('Add Payment'),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 148, 227, 249), // Updated parameter
+                        padding: EdgeInsets.all(16),
+                        textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: _showAddPaymentDialog,
+                      child: Text('Add Payment', style: TextStyle(color: Colors.white),),
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columns: [
-                        DataColumn(label: Text('ID')),
-                        DataColumn(label: Text('Name')),
-                        DataColumn(label: Text('Room No')),
-                        DataColumn(label: Text('Amount')),
-                        DataColumn(label: Text('Date')),
-                        DataColumn(label: Text('Note')),
-                        DataColumn(label: Text('Actions')),
-                      ],
-                      rows: _filteredPayments.map((payment) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(payment['id'].toString())),
-                            DataCell(Text(payment['name'])),
-                            DataCell(Text(payment['roomno'].toString())),
-                            DataCell(Text(payment['amount'].toString())),
-                            DataCell(Text(payment['date'])),
-                            DataCell(Text(payment['note'] ?? '')),
-                            DataCell(
-                              IconButton(
-                                icon: Icon(Icons.edit),
-                                onPressed: () => _showEditPaymentDialog(payment),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columns: [
+                          DataColumn(label: Text('ID')),
+                          DataColumn(label: Text('Name')),
+                          DataColumn(label: Text('Room No')),
+                          DataColumn(label: Text('Amount')),
+                          DataColumn(label: Text('Date')),
+                          DataColumn(label: Text('Note')),
+                          DataColumn(label: Text('Actions')),
+                        ],
+                        rows: _filteredPayments.map((payment) {
+                          return DataRow(
+                            cells: [
+                              DataCell(Text(payment['id'].toString())),
+                              DataCell(Text(payment['name'])),
+                              DataCell(Text(payment['roomno'].toString())),
+                              DataCell(Text(payment['amount'].toString())),
+                              DataCell(Text(payment['date'])),
+                              DataCell(Text(payment['note'] ?? '')),
+                              DataCell(
+                                IconButton(
+                                  icon: Icon(Icons.edit),
+                                  onPressed: () => _showEditPaymentDialog(payment),
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
+                            ],
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 }

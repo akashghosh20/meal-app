@@ -186,61 +186,80 @@ class _SelectDateScreenState extends State<SelectDateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Generate and Share PDF'),
+        title: Text('Generate and Share PDF',  style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Select Date',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            GestureDetector(
-              onTap: () => _selectDate(context),
-              child: AbsorbPointer(
-                child: TextField(
-                  controller: _dateController,
-                  decoration: InputDecoration(
-                    labelText: 'Date',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.calendar_today),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Select Date',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: _dateController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      labelText: 'Date',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                        color: Colors.orange,
+                        width: 5
+                        )
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide(
+                        color: Colors.green, // Border color when focused
+                        width: 2.0,
+                        ),
+                      ),
+                      prefixIcon: Icon(Icons.calendar_today),
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () {
-                      final date = _dateController.text;
-                      if (date.isNotEmpty) {
-                        _generateAndDisplayPdf(date);
-                      } else {
-                        setState(() {
-                          _message = 'Please select a date';
-                        });
-                      }
-                    },
-              child: _isLoading
-                  ? GFLoader(type: GFLoaderType.square,)
-                  : Text('Generate PDF'),
-              style: ElevatedButton.styleFrom(
-                shadowColor: Colors.blueAccent,
-                padding: EdgeInsets.symmetric(vertical: 16),
-                textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        final date = _dateController.text;
+                        if (date.isNotEmpty) {
+                          _generateAndDisplayPdf(date);
+                        } else {
+                          setState(() {
+                            _message = 'Please select a date';
+                          });
+                        }
+                      },
+                child: _isLoading ? GFLoader(type: GFLoaderType.square,) : Text('Generate PDF', style: TextStyle(color: Colors.white),),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 148, 227, 249),
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              _message,
-              style: TextStyle(fontSize: 16, color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              SizedBox(height: 20),
+              Text(
+                _message,
+                style: TextStyle(fontSize: 16, color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

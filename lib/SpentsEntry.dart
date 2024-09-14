@@ -77,68 +77,118 @@ class _InsertSpentsScreenState extends State<InsertSpentsScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text('Insert Spents'),
-        backgroundColor: Colors.blueAccent,
+        title: Text('Insert Spents', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Enter Spent Details',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: _amountController,
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.monetization_on),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Enter Spent Details',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 16),
-            GestureDetector(
-              onTap: () => _selectDate(context),
-              child: AbsorbPointer(
-                child: TextField(
-                  controller: _dateController,
-                  decoration: InputDecoration(
-                    labelText: 'Date',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.calendar_today),
+              SizedBox(height: 20),
+              TextField(
+                controller: _amountController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  labelText: 'Amount',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Colors.orange,
+                      width: 5
+                    )
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(
+                      color: Colors.green, // Border color when focused
+                      width: 2.0,
+                    ),
+                  ),
+                  prefixIcon: Icon(Icons.monetization_on),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 16),
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: _dateController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      labelText: 'Date',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                        color: Colors.orange,
+                        width: 5
+                        )
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide(
+                        color: Colors.green, // Border color when focused
+                        width: 2.0,
+                        ),
+                      ),
+                      prefixIcon: Icon(Icons.calendar_today),
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _noteController,
-              decoration: InputDecoration(
-                labelText: 'Note',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.note),
+              SizedBox(height: 16),
+              TextField(
+                controller: _noteController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  labelText: 'Note',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                    color: Colors.orange,
+                    width: 5
+                    )
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(
+                    color: Colors.green, // Border color when focused
+                    width: 2.0,
+                    ),
+                  ),
+                  prefixIcon: Icon(Icons.note),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading ? null : insertSpents,
-              child: _isLoading ? CircularProgressIndicator() : Text('Insert Spents'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent, // Updated parameter
-                padding: EdgeInsets.symmetric(vertical: 16),
-                textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isLoading ? null : insertSpents,
+                child: _isLoading ? CircularProgressIndicator() : Text('Insert Spents', style: TextStyle(color: Colors.white),),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 148, 227, 249), // Updated parameter
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              _message,
-              style: TextStyle(fontSize: 16, color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              SizedBox(height: 20),
+              Text(
+                _message,
+                style: TextStyle(fontSize: 16, color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -43,50 +43,56 @@ class _GetSpentsScreenState extends State<GetSpentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Spents Data'),
+        title: Text('Spents Data',  style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: _spentsData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: GFLoader(type: GFLoaderType.square,));
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-            return Center(child: Text('No data available'));
-          } else {
-            final spents = snapshot.data!;
-
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView.builder(
-                itemCount: spents.length,
-                itemBuilder: (context, index) {
-                  final spent = spents[index];
-                  return Card(
-                    elevation: 4,
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      title: Text(
-                        'Amount: \$${spent['amount']}',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: FutureBuilder<List<dynamic>>(
+          future: _spentsData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: GFLoader(type: GFLoaderType.circle,));
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
+              return Center(child: Text('No data available'));
+            } else {
+              final spents = snapshot.data!;
+        
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView.builder(
+                  itemCount: spents.length,
+                  itemBuilder: (context, index) {
+                    final spent = spents[index];
+                    return Card(
+                      elevation: 4,
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      child: ListTile(
+                        title: Text(
+                          'Amount: \$${spent['amount']}',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Date: ${spent['date']}', style: TextStyle(fontSize: 16)),
+                            Text('Note: ${spent['note']}', style: TextStyle(fontSize: 16)),
+                            Text('Created At: ${spent['created_at']}', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                        contentPadding: EdgeInsets.all(16),
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Date: ${spent['date']}', style: TextStyle(fontSize: 16)),
-                          Text('Note: ${spent['note']}', style: TextStyle(fontSize: 16)),
-                          Text('Created At: ${spent['created_at']}', style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                      contentPadding: EdgeInsets.all(16),
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-        },
+                    );
+                  },
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }

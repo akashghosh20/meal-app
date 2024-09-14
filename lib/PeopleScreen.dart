@@ -78,86 +78,92 @@ class _PeopleScreenState extends State<PeopleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('People List'),
+        title: Text('People List', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: _peopleData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: GFLoader(type: GFLoaderType.square,));
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
-            return Center(child: Text('No data available'));
-          } else {
-            final people = snapshot.data!;
-            if (_filteredPeople.isEmpty && _searchQuery.isEmpty) {
-              _filteredPeople = people;
-            }
-
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GFSearchBar(
-                    searchList: people,
-                    searchQueryBuilder: (query, list) {
-                      _onSearchChanged(query, people);  // Call debounce method
-                      return _filteredPeople.map((item) => item['name']).toList();
-                    },
-                    overlaySearchListItemBuilder: (dynamic item) => Container(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        item,
-                        style: const TextStyle(fontSize: 18),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: FutureBuilder<List<dynamic>>(
+          future: _peopleData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: GFLoader(type: GFLoaderType.circle,));
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.isEmpty) {
+              return Center(child: Text('No data available'));
+            } else {
+              final people = snapshot.data!;
+              if (_filteredPeople.isEmpty && _searchQuery.isEmpty) {
+                _filteredPeople = people;
+              }
+        
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GFSearchBar(
+                      searchList: people,
+                      searchQueryBuilder: (query, list) {
+                        _onSearchChanged(query, people);  // Call debounce method
+                        return _filteredPeople.map((item) => item['name']).toList();
+                      },
+                      overlaySearchListItemBuilder: (dynamic item) => Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          item,
+                          style: const TextStyle(fontSize: 18),
+                        ),
                       ),
+                      onItemSelected: (dynamic item) {
+                        final selectedPerson = people.firstWhere((person) => person['name'] == item);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PersonDetailsScreen(person: selectedPerson),
+                          ),
+                        );
+                      },
                     ),
-                    onItemSelected: (dynamic item) {
-                      final selectedPerson = people.firstWhere((person) => person['name'] == item);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PersonDetailsScreen(person: selectedPerson),
-                        ),
-                      );
-                    },
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _filteredPeople.length,
-                    itemBuilder: (context, index) {
-                      final person = _filteredPeople[index];
-                      return Card(
-                        elevation: 4,
-                        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                        child: ListTile(
-                          title: Text(
-                            person['name'],
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _filteredPeople.length,
+                      itemBuilder: (context, index) {
+                        final person = _filteredPeople[index];
+                        return Card(
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          child: ListTile(
+                            title: Text(
+                              person['name'],
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              'Room: ${person['roomno']}\nPayment: ${person['payment']}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            isThreeLine: true,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PersonDetailsScreen(person: person),
+                                ),
+                              );
+                            },
                           ),
-                          subtitle: Text(
-                            'Room: ${person['roomno']}\nPayment: ${person['payment']}',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          isThreeLine: true,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PersonDetailsScreen(person: person),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
-            );
-          }
-        },
+                ],
+              );
+            }
+          },
+        ),
       ),
     );
   }
