@@ -119,135 +119,146 @@ class _InsertMealScreenState extends State<InsertMealScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Insert Meal'),
+        title: Text('Insert Meal', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Searchable Dropdown
-                  DropdownSearch<dynamic>(
-                    items: _students,
-                    itemAsString: (item) => item['name'] ?? '',
-                    dropdownDecoratorProps: DropDownDecoratorProps(
-                      dropdownSearchDecoration: InputDecoration(
-                        labelText: 'Select Student',
-                        prefixIcon: Icon(Icons.person),
-                      ),
-                    ),
-                    popupProps: PopupProps.dialog(
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        decoration: InputDecoration(
-                          hintText: 'Search...',
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Searchable Dropdown
+                    DropdownSearch<dynamic>(
+                      items: _students,
+                      itemAsString: (item) => item['name'] ?? '',
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: 'Select Student',
+                          prefixIcon: Icon(Icons.person),
                         ),
                       ),
-                    ),
-                    onChanged: (selectedItem) {
-                      if (selectedItem != null) {
-                        setState(() {
-                          _selectedStudent = selectedItem['id'].toString();
-                          _selectedHallId = selectedItem['hallid'];
-                        });
-                      }
-                    },
-                    selectedItem: _students.isNotEmpty
-                        ? _students.firstWhere(
-                            (student) => student['id'].toString() == _selectedStudent,
-                            orElse: () => _students.first)
-                        : null,
-                  ),
-                  SizedBox(height: 20),
-                  TextFormField(
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: 'Select Date',
-                      suffixIcon: Icon(Icons.calendar_today),
-                    ),
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2101),
-                      );
-                      if (picked != null && picked != _selectedDate) {
-                        setState(() {
-                          _selectedDate = picked;
-                          _mealDayId = DateFormat('yyyyMMdd').format(_selectedDate); // Update mealDayId
-                        });
-                      }
-                    },
-                    controller: TextEditingController(
-                      text: DateFormat('yyyy-MM-dd').format(_selectedDate),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Status: $_status', style: TextStyle(fontSize: 18)),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.remove),
-                            onPressed: () {
-                              setState(() {
-                                if (_status > 0) _status--;
-                              });
-                            },
+                      popupProps: PopupProps.dialog(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          decoration: InputDecoration(
+                            hintText: 'Search...',
                           ),
-                          IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {
-                              setState(() {
-                                _status++;
-                              });
-                            },
-                          ),
-                        ],
+                        ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  DropdownButtonFormField<String>(
-                    value: _mealType,
-                    hint: Text('Select Meal Type'),
-                    items: ['Lunch', 'Full Meal'].map((mealType) {
-                      return DropdownMenuItem<String>(
-                        value: mealType,
-                        child: Text(mealType),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _mealType = value!;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: _submitMeal,
-                      child: Text('Submit Meal'),
+                      onChanged: (selectedItem) {
+                        if (selectedItem != null) {
+                          setState(() {
+                            _selectedStudent = selectedItem['id'].toString();
+                            _selectedHallId = selectedItem['hallid'];
+                          });
+                        }
+                      },
+                      selectedItem: _students.isNotEmpty
+                          ? _students.firstWhere(
+                              (student) => student['id'].toString() == _selectedStudent,
+                              orElse: () => _students.first)
+                          : null,
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  if (_message.isNotEmpty)
+                    SizedBox(height: 20),
+                    TextFormField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'Select Date',
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDate,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2101),
+                        );
+                        if (picked != null && picked != _selectedDate) {
+                          setState(() {
+                            _selectedDate = picked;
+                            _mealDayId = DateFormat('yyyyMMdd').format(_selectedDate); // Update mealDayId
+                          });
+                        }
+                      },
+                      controller: TextEditingController(
+                        text: DateFormat('yyyy-MM-dd').format(_selectedDate),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Status: $_status', style: TextStyle(fontSize: 18)),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.remove),
+                              onPressed: () {
+                                setState(() {
+                                  if (_status > 0) _status--;
+                                });
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () {
+                                setState(() {
+                                  _status++;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    DropdownButtonFormField<String>(
+                      value: _mealType,
+                      hint: Text('Select Meal Type'),
+                      items: ['Lunch', 'Full Meal'].map((mealType) {
+                        return DropdownMenuItem<String>(
+                          value: mealType,
+                          child: Text(mealType),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _mealType = value!;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 20),
                     Center(
-                      child: Text(
-                        _message,
-                        style: TextStyle(
-                          color: _message.contains('successfully') ? Colors.green : Colors.red,
+                      child: ElevatedButton(
+                        onPressed: _submitMeal,
+                        child: Text('Submit Meal', style: TextStyle(color: Colors.white),),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 148, 227, 249), // Updated parameter
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
-                ],
+                    SizedBox(height: 20),
+                    if (_message.isNotEmpty)
+                      Center(
+                        child: Text(
+                          _message,
+                          style: TextStyle(
+                            color: _message.contains('successfully') ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

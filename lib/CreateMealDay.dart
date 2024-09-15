@@ -148,51 +148,77 @@ Future<void> _fetchMealDays() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Meal Day'),
+        title: Text('Create Meal Day', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Date Picker for the main date
-              ListTile(
-                title: Text('Select Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}'),
-                trailing: Icon(Icons.calendar_today),
-                onTap: () => _selectDate(context),
-              ),
-              SizedBox(height: 20),
-
-              // Dropdown for the copy date
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'Select Copy Date',
-                  border: OutlineInputBorder(),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Date Picker for the main date
+                ListTile(
+                  title: Text('Select Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}', style: TextStyle(fontWeight: FontWeight.bold),),
+                  trailing: Icon(Icons.calendar_today),
+                  onTap: () => _selectDate(context),
                 ),
-                value: _selectedCopyDateId,
-                items: _mealDays.map((mealDay) {
-                  return DropdownMenuItem<String>(
-                    value: mealDay['id'].toString(), // Use the id as the value
-                    child: Text(mealDay['date']), // Display the date in the dropdown
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCopyDateId = value;
-                  });
-                },
-                validator: (value) => value == null ? 'Please select a copy date' : null,
-              ),
-              SizedBox(height: 40),
-
-              // Submit Button
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: Text('Create Meal Day'),
-              ),
-            ],
+                SizedBox(height: 20),
+        
+                // Dropdown for the copy date
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelText: 'Select Copy Date',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                      color: Colors.orange,
+                      width: 5
+                      )
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(
+                      color: Colors.green, // Border color when focused
+                      width: 2.0,
+                      ),
+                    ),
+                  ),
+                  value: _selectedCopyDateId,
+                  items: _mealDays.map((mealDay) {
+                    return DropdownMenuItem<String>(
+                      value: mealDay['id'].toString(), // Use the id as the value
+                      child: Text(mealDay['date']), // Display the date in the dropdown
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCopyDateId = value;
+                    });
+                  },
+                  validator: (value) => value == null ? 'Please select a copy date' : null,
+                ),
+                SizedBox(height: 20),
+        
+                // Submit Button
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  child: Text('Create Meal Day', style: TextStyle(color: Colors.white, fontSize: 15), ),
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 148, 227, 249), // Updated parameter
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                )
+                ),
+              ],
+            ),
           ),
         ),
       ),
