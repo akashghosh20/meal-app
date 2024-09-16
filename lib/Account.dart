@@ -126,7 +126,7 @@ class _AccountPageState extends State<AccountPage> {
             ),
             Expanded(
               child: filteredMealData.isEmpty
-                  ? Center(child: GFLoader(type: GFLoaderType.square,))
+                  ? Center(child: GFLoader(type: GFLoaderType.circle,))
                   : SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(

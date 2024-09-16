@@ -180,52 +180,58 @@ class PersonDetailsScreen extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text('Details for ${person['name']}'),
+        title: Text('Details for ${person['name']}', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Room Number: ${person['roomno']}',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Payment: ${person['payment']}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Meal Status Over Time',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: mealDates.length,
-                itemBuilder: (context, index) {
-                  final date = mealDates[index];
-                  return Card(
-                    elevation: 2,
-                    margin: EdgeInsets.symmetric(vertical: 4),
-                    child: ListTile(
-                      title: Text(
-                        'Date: $date',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        'Meals: ${person[date]}',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      contentPadding: EdgeInsets.all(16),
-                    ),
-                  );
-                },
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Room Number: ${person['roomno']}',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              SizedBox(height: 10),
+              Text(
+                'Payment: ${person['payment']}',
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Meal Status Over Time',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: mealDates.length,
+                  itemBuilder: (context, index) {
+                    final date = mealDates[index];
+                    return Card(
+                      elevation: 2,
+                      margin: EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        title: Text(
+                          'Date: $date',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          'Meals: ${person[date]}',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

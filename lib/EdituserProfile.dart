@@ -101,70 +101,83 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
+        title: Text('Edit Profile', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextFormField(
-                        initialValue: _username,
-                        decoration: InputDecoration(labelText: 'Username'),
-                        onSaved: (value) => _username = value,
-                        validator: (value) => value!.isEmpty ? 'Please enter your username' : null,
-                      ),
-                      TextFormField(
-                        initialValue: _email,
-                        decoration: InputDecoration(labelText: 'Email'),
-                        onSaved: (value) => _email = value,
-                        validator: (value) => value!.isEmpty ? 'Please enter your email' : null,
-                      ),
-                      TextFormField(
-                        initialValue: _phone,
-                        decoration: InputDecoration(labelText: 'Phone'),
-                        onSaved: (value) => _phone = value,
-                        validator: (value) => value!.isEmpty ? 'Please enter your phone number' : null,
-                      ),
-                      TextFormField(
-                        initialValue: _bloodGroup,
-                        decoration: InputDecoration(labelText: 'Blood Group'),
-                        onSaved: (value) => _bloodGroup = value,
-                        validator: (value) => value!.isEmpty ? 'Please enter your blood group' : null,
-                      ),
-                      TextFormField(
-                        initialValue: _password,
-                        decoration: InputDecoration(labelText: 'Password'),
-                        obscureText: true,
-                        onSaved: (value) => _password = value,
-                        validator: (value) => value!.isEmpty ? 'Please enter your password' : null,
-                      ),
-                     
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _updateProfile,
-                        child: Text('Update Profile'),
-                      ),
-                      SizedBox(height: 20),
-                      if (_message.isNotEmpty)
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextFormField(
+                          initialValue: _username,
+                          decoration: InputDecoration(labelText: 'Username'),
+                          onSaved: (value) => _username = value,
+                          validator: (value) => value!.isEmpty ? 'Please enter your username' : null,
+                        ),
+                        TextFormField(
+                          initialValue: _email,
+                          decoration: InputDecoration(labelText: 'Email'),
+                          onSaved: (value) => _email = value,
+                          validator: (value) => value!.isEmpty ? 'Please enter your email' : null,
+                        ),
+                        TextFormField(
+                          initialValue: _phone,
+                          decoration: InputDecoration(labelText: 'Phone'),
+                          onSaved: (value) => _phone = value,
+                          validator: (value) => value!.isEmpty ? 'Please enter your phone number' : null,
+                        ),
+                        TextFormField(
+                          initialValue: _bloodGroup,
+                          decoration: InputDecoration(labelText: 'Blood Group'),
+                          onSaved: (value) => _bloodGroup = value,
+                          validator: (value) => value!.isEmpty ? 'Please enter your blood group' : null,
+                        ),
+                        TextFormField(
+                          initialValue: _password,
+                          decoration: InputDecoration(labelText: 'Password'),
+                          obscureText: true,
+                          onSaved: (value) => _password = value,
+                          validator: (value) => value!.isEmpty ? 'Please enter your password' : null,
+                        ),
+                       
+                        SizedBox(height: 20),
                         Center(
-                          child: Text(
-                            _message,
-                            style: TextStyle(
-                              color: _message.contains('successfully') ? Colors.green : Colors.red,
+                          child: ElevatedButton(
+                            onPressed: _updateProfile,
+                            child: Text('Update Profile', style: TextStyle(color: Colors.white),),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 148, 227, 249), // Updated parameter
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
-                    ],
+                        SizedBox(height: 20),
+                        if (_message.isNotEmpty)
+                          Center(
+                            child: Text(
+                              _message,
+                              style: TextStyle(
+                                color: _message.contains('successfully') ? Colors.green : Colors.red,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }

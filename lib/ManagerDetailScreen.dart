@@ -112,7 +112,10 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manager Details'),
+        title: Text('Manager Details', style: TextStyle(color: Colors.black),),
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -124,75 +127,78 @@ class _ManagerDetailScreenState extends State<ManagerDetailScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _mealData,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: GFLoader(type: GFLoaderType.circle));
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('No data available'));
-          } else {
-            final mealData = snapshot.data!;
-
-            // Extract date keys, excluding non-date fields
-            final dateKeys = mealData.keys.where((key) {
-              final regex = RegExp(r'\d{4}-\d{2}-\d{2}');
-              return regex.hasMatch(key);
-            }).toList();
-
-            return ListView(
-              padding: EdgeInsets.all(16.0),
-              children: <Widget>[
-                Text('Name: ${mealData['name']}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('Room No: ${mealData['roomno']}', style: TextStyle(fontSize: 16)),
-                Text('Manager Name: ${mealData['managername']}', style: TextStyle(fontSize: 16)),
-                SizedBox(height: 20),
-                Text('Meal Dates:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...dateKeys.map((date) {
-                  int mealCount = int.tryParse(mealData[date]) ?? 0;
-
-                  return ListTile(
-                    title: Text(date),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        if (shouldAllowUpdate(date)) ...[
-                          IconButton(
-                            icon: Icon(Icons.remove),
-                            onPressed: () async {
-                              if (mealCount > 0) {
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _mealData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: GFLoader(type: GFLoaderType.circle));
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data == null) {
+              return Center(child: Text('No data available'));
+            } else {
+              final mealData = snapshot.data!;
+        
+              // Extract date keys, excluding non-date fields
+              final dateKeys = mealData.keys.where((key) {
+                final regex = RegExp(r'\d{4}-\d{2}-\d{2}');
+                return regex.hasMatch(key);
+              }).toList();
+        
+              return ListView(
+                padding: EdgeInsets.all(16.0),
+                children: <Widget>[
+                  Text('Name: ${mealData['name']}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text('Room No: ${mealData['roomno']}', style: TextStyle(fontSize: 16)),
+                  Text('Manager Name: ${mealData['managername']}', style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 20),
+                  Text('Meal Dates:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ...dateKeys.map((date) {
+                    int mealCount = int.tryParse(mealData[date]) ?? 0;
+        
+                    return ListTile(
+                      title: Text(date),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          if (shouldAllowUpdate(date)) ...[
+                            IconButton(
+                              icon: Icon(Icons.remove),
+                              onPressed: () async {
+                                if (mealCount > 0) {
+                                  setState(() {
+                                    mealCount--;
+                                    mealData[date] = mealCount.toString();
+                                  });
+                                  await updateMealCount(date, mealCount);
+                                }
+                              },
+                            ),
+                          ],
+                          Text(formatMealCount(mealCount)),
+                          if (shouldAllowUpdate(date)) ...[
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () async {
                                 setState(() {
-                                  mealCount--;
+                                  mealCount++;
                                   mealData[date] = mealCount.toString();
                                 });
                                 await updateMealCount(date, mealCount);
-                              }
-                            },
-                          ),
+                              },
+                            ),
+                          ],
                         ],
-                        Text(formatMealCount(mealCount)),
-                        if (shouldAllowUpdate(date)) ...[
-                          IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () async {
-                              setState(() {
-                                mealCount++;
-                                mealData[date] = mealCount.toString();
-                              });
-                              await updateMealCount(date, mealCount);
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ],
-            );
-          }
-        },
+                      ),
+                    );
+                  }),
+                ],
+              );
+            }
+          },
+        ),
       ),
     );
   }

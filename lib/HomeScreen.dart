@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:http/http.dart' as http;
@@ -170,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
       future: _managerLists,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: GFLoader(type: GFLoaderType.square));
+          return Center(child: GFLoader(type: GFLoaderType.circle));
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -213,11 +214,13 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 200,
           width: double.infinity,
           decoration: BoxDecoration(
+            color: Colors.transparent,
             image: DecorationImage(
               image: AssetImage('Assets/avatar.png'), // Placeholder cover photo
               fit: BoxFit.cover,
             ),
             borderRadius: BorderRadius.circular(8),
+            
           ),
         ),
         SizedBox(height: 16),
@@ -282,14 +285,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => EditProfileScreen()),
-            );
-          },
-          child: Text('Edit Profile'),
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EditProfileScreen()),
+              );
+            },
+            child: Text('Edit Profile', style: TextStyle(color: Colors.black),),
+            style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 148, 227, 249), // Updated parameter
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+          ),
+        ),
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (route) => false);
+            },
+            child: Text('Log Out', style: TextStyle(color: Colors.black),),
+            style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 148, 227, 249), // Updated parameter
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+          ),
         ),
         SizedBox(height: 20),
         if (_message.isNotEmpty)
@@ -333,6 +357,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text('Room No: ${mealData['roomno'] ?? 'N/A'}', style: TextStyle(fontSize: 16)),
                 Text('Manager Name: ${mealData['managername'] ?? 'N/A'}', style: TextStyle(fontSize: 16)),
                 SizedBox(height: 20),
+                Divider(
+                  height: 10,
+                  thickness: 2,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Colors.black38,
+                ),
+                SizedBox(height: 20,),
                 Text('Meal Dates:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ...mealData.keys.where((key) {
                   final regex = RegExp(r'\d{4}-\d{2}-\d{2}');
@@ -340,11 +372,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 }).map((date) {
                   int mealCount = int.tryParse(mealData[date]) ?? 0;
 
-                  return ListTile(
-                    title: Text(date),
-                    trailing: Text(mealCount == 0 ? 'OFF' : mealCount == 1 ? 'ON' : mealCount.toString()),
+                  return Card(
+                    child: ListTile(
+                      title: Text(date),
+                      trailing: Text(mealCount == 0 ? 'OFF' : mealCount == 1 ? 'ON' : mealCount.toString()),
+                    ),
                   );
-                }).toList(),
+                }),
               ],
             );
           } else {
@@ -372,23 +406,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor:const Color.fromARGB(255, 148, 227, 249),
+        shadowColor: Colors.lightBlueAccent[100],
+        elevation: 4,
         centerTitle: true,
-        backgroundColor: Colors.blue,
         title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (name != null) Text(name!),
             if (role != null) Text('Role: $role'),
           ],
         ),
       ),
-      body: _getBodyWidget(),
+      body: Container(
+        color: const Color.fromARGB(255, 208, 239, 255),
+        child: _getBodyWidget()
+      ),
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex,
         onTap: _onTabTapped,
         items: <CurvedNavigationBarItem>[
           CurvedNavigationBarItem(
-            child: Icon(Icons.home, size: 30),
+            child: Icon(Icons.home, size: 30,),
             label: 'Home',
           ),
           CurvedNavigationBarItem(
@@ -400,8 +439,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Profile',
           ),
         ],
-        color: Colors.blue,
-        backgroundColor: Colors.white,
+        color: const Color.fromARGB(255, 148, 227, 249),
+        backgroundColor: const Color.fromARGB(255, 208, 239, 255),
         height: 60.0,
       ),
     );
