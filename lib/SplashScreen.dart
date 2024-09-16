@@ -48,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               SizedBox(height: 20),
               GFLoader(
-                type: GFLoaderType.square,
+                type: GFLoaderType.circle,
               ),
             ],
           ),
